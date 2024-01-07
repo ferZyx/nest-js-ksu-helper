@@ -62,7 +62,7 @@ export class UsersController {
 	@UseInterceptors(ClassSerializerInterceptor)
 	@UseGuards(JwtAuthGuard)
 	@Get('me')
-	async getMe(@Req() request: any) {
+	async getMe(@Req() request: Request) {
 		const user = await this.usersService.getMe(request)
 		return new UserDto(user.toObject())
 	}

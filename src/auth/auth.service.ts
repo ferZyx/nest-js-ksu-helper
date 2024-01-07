@@ -67,17 +67,17 @@ export class AuthService {
 	}
 
 	private extractTokenFromRequest(request: Request): string {
-		const authHeader = request.headers!.authorization
+		const token = request.cookies.token
 
-		if (!authHeader) {
+		if (!token) {
 			return null
 		}
 
-		const [type, token] = authHeader.split(' ')
+		// const [type, token] = authHeader.split(' ')
 
-		if (type !== 'Bearer' || !token) {
-			return null
-		}
+		// if (type !== 'Bearer' || !token) {
+		// 	return null
+		// }
 
 		return token
 	}

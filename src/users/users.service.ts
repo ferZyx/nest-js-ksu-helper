@@ -41,7 +41,7 @@ export class UsersService {
 		return user
 	}
 
-	async getMe(request: any): Promise<UserDocument> {
+	async getMe(request): Promise<UserDocument> {
 		const userId = request.user.id
 		const user = await this.findUserById(userId)
 		return user
