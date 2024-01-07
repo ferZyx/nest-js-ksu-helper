@@ -35,4 +35,15 @@ export class UsersService {
 		const user = await this.userModel.findOne({ email }).populate('roles')
 		return user
 	}
+
+	async findUserById(id: string): Promise<UserDocument> {
+		const user = await this.userModel.findById(id).populate('roles')
+		return user
+	}
+
+	async getMe(request: any): Promise<UserDocument> {
+		const userId = request.user.id
+		const user = await this.findUserById(userId)
+		return user
+	}
 }

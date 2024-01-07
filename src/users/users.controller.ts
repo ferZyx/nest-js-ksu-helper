@@ -1,10 +1,13 @@
 import {
 	Body,
+	ClassSerializerInterceptor,
 	Controller,
 	Get,
 	HttpStatus,
 	Post,
-	UseGuards
+	Req,
+	UseGuards,
+	UseInterceptors
 } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { CreateUserDto } from './dtos/create-user.dto'
@@ -12,6 +15,8 @@ import { User } from '../schemas/user.schema'
 import { UsersService } from './users.service'
 import { RolesAuthGuard } from '../auth/roles-auth.guard'
 import { Roles } from '../auth/roles-auth.decorator'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { UserDto } from './dtos/user.dto'
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -48,5 +53,17 @@ export class UsersController {
 		return this.usersService.getAll()
 	}
 
-	delete() {}
+	@ApiOperation({ summary: 'Получить инфу о себе.' })
+	@ApiResponse({
+		type: User,
+		status: HttpStatus.OK,
+		description: 'Успешное получение о себе'
+	})
+	@UseInterceptors(ClassSerializerInterceptor)
+	@UseGuards(JwtAuthGuard)
+	@Get('me')
+	async getMe(@Req() request: any) {
+		const user = await this.usersService.getMe(request)
+		return new UserDto(user.toObject())
+	}
 }
