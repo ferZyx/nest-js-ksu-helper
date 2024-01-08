@@ -16,7 +16,7 @@ async function bootstrap() {
 	app.setGlobalPrefix('api')
 
 	const config = new DocumentBuilder()
-		.setTitle('Ето название')
+		.setTitle('Апишечка от бога')
 		.setDescription('Владик смог запусить сваггер')
 		.setVersion('1.0.0')
 		.build()
