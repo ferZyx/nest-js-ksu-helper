@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	UnauthorizedException
+} from '@nestjs/common'
 import { CreateUserDto } from '../users/dtos/create-user.dto'
 import { UsersService } from '../users/users.service'
 import { JwtService } from '@nestjs/jwt'
@@ -43,7 +47,7 @@ export class AuthService {
 		if (user && passwordEquals) {
 			return user
 		}
-		throw new UnauthorizedException({
+		throw new BadRequestException({
 			message: 'Некорректный емайл или пароль'
 		})
 	}

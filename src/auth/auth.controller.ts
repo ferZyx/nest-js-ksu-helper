@@ -53,7 +53,7 @@ export class AuthController {
 		description: 'Успешная авторизация'
 	})
 	@ApiResponse({
-		status: HttpStatus.UNAUTHORIZED,
+		status: HttpStatus.BAD_REQUEST,
 		description: 'Указаны некорректные данные'
 	})
 	@HttpCode(200)
