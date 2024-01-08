@@ -63,14 +63,14 @@ export class AuthController {
 		@Body() dto: LoginUserDto,
 		@Res({ passthrough: true }) res: Response
 	) {
-		const { token } = await this.authService.login(dto)
+		const token = await this.authService.login(dto)
 
 		res.cookie('token', token, {
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 			httpOnly: true,
 			secure: true
 		})
-		return token
+		return { token }
 	}
 
 	@Post('/logout')
