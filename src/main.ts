@@ -12,7 +12,7 @@ async function bootstrap() {
 		origin: [
 			'https://tolyan.me',
 			'http://tolyan.me:3000',
-			// 'http://localhost:3000'
+			'http://localhost:3000'
 		]
 	})
 	app.use(cookieParser())
