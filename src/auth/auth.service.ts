@@ -1,8 +1,4 @@
-import {
-	BadRequestException,
-	Injectable,
-	UnauthorizedException
-} from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { CreateUserDto } from '../users/dtos/create-user.dto'
 import { UsersService } from '../users/users.service'
 import { JwtService } from '@nestjs/jwt'
@@ -35,10 +31,12 @@ export class AuthService {
 
 	private async generateToken(user: UserDocument) {
 		const payload = { email: user.email, id: user._id, roles: user.roles }
-		return this.jwtService.sign(payload)
+		return {
+			token: this.jwtService.sign(payload)
+		}
 	}
 
-	private async validateUser(userDto: LoginUserDto) {
+	private async validateUser(userDto: LoginUserDto): Promise<UserDocument> {
 		const user = await this.usersService.findUserByEmail(userDto.email)
 		const passwordEquals = await bcrypt.compare(
 			userDto.password,
@@ -47,40 +45,28 @@ export class AuthService {
 		if (user && passwordEquals) {
 			return user
 		}
-		throw new BadRequestException({
+		throw new UnauthorizedException({
 			message: 'Некорректный емайл или пароль'
 		})
 	}
 
-	isAuthenticated(request: any) {
+	isAuthenticated(request: Request): boolean {
 		const token = this.extractTokenFromRequest(request)
-
 		if (!token) {
 			throw new UnauthorizedException('Не указан токен авторизации')
 		}
 
 		try {
 			const decodedToken = this.jwtService.verify(token)
-			request.user = decodedToken
+			request['user'] = decodedToken
 			return !!decodedToken
 		} catch (error) {
 			throw new UnauthorizedException('Недействительный токен авторизации')
 		}
 	}
 
-	private extractTokenFromRequest(request: Request): string {
-		const token = request.headers.authorization
-
-		if (!token) {
-			return null
-		}
-
-		// const [type, token] = authHeader.split(' ')
-
-		// if (type !== 'Bearer' || !token) {
-		// 	return null
-		// }
-
-		return token
+	private extractTokenFromRequest(request: Request): string | undefined {
+		const [type, token] = request.headers.authorization?.split(' ') ?? []
+		return type === 'Bearer' ? token : undefined
 	}
 }
