@@ -11,7 +11,7 @@ import { AuthService } from './auth.service'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { CreateUserDto } from '../users/dtos/create-user.dto'
 import { LoginUserDto } from '../users/dtos/login-user.dto'
-import { Public } from '../../dist/auth/public.decorator'
+import { Public } from './public-route.decorator'
 
 @ApiTags('Авторизация')
 @Controller('auth')

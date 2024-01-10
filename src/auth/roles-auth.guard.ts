@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core'
 import { ROLES_KEY } from './roles-auth.decorator'
 import { Request } from 'express'
 import { JwtService } from '@nestjs/jwt'
-import { IS_PUBLIC_KEY } from '../../dist/auth/public.decorator'
+import { IS_PUBLIC_KEY } from './public-route.decorator'
 
 @Injectable()
 export class RolesAuthGuard implements CanActivate {
