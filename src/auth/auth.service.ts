@@ -69,7 +69,7 @@ export class AuthService {
 	}
 
 	private extractTokenFromRequest(request: Request): string {
-		const token = request.cookies.token
+		const token = request.headers.authorization
 
 		if (!token) {
 			return null
