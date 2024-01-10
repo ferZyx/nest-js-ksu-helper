@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcryptjs'
 import { UserDocument } from '../schemas/user.schema'
 import { LoginUserDto } from '../users/dtos/login-user.dto'
-import { Request } from 'express'
 
 @Injectable()
 export class AuthService {
@@ -48,25 +47,5 @@ export class AuthService {
 		throw new UnauthorizedException({
 			message: 'Некорректный емайл или пароль'
 		})
-	}
-
-	isAuthenticated(request: Request): boolean {
-		const token = this.extractTokenFromRequest(request)
-		if (!token) {
-			throw new UnauthorizedException('Не указан токен авторизации')
-		}
-
-		try {
-			const decodedToken = this.jwtService.verify(token)
-			request['user'] = decodedToken
-			return !!decodedToken
-		} catch (error) {
-			throw new UnauthorizedException('Недействительный токен авторизации')
-		}
-	}
-
-	private extractTokenFromRequest(request: Request): string | undefined {
-		const [type, token] = request.headers.authorization?.split(' ') ?? []
-		return type === 'Bearer' ? token : undefined
 	}
 }

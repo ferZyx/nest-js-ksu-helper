@@ -28,22 +28,19 @@ export class UsersService {
 
 		const userRole = await this.roleService.getRoleByName('User')
 		const user = await this.userModel.create({ ...dto, roles: [userRole._id] })
-		return await user.populate('roles')
+		return user.populate('roles')
 	}
 
 	async findUserByEmail(email: string): Promise<UserDocument> {
-		const user = await this.userModel.findOne({ email }).populate('roles')
-		return user
+		return this.userModel.findOne({ email }).populate('roles')
 	}
 
 	async findUserById(id: string): Promise<UserDocument> {
-		const user = await this.userModel.findById(id).populate('roles')
-		return user
+		return this.userModel.findById(id).populate('roles')
 	}
 
-	async getMe(request): Promise<UserDocument> {
-		const userId = request.user.id
-		const user = await this.findUserById(userId)
-		return user
+	async getMe(request: Request): Promise<UserDocument> {
+		const userId = request['user'].id
+		return this.findUserById(userId)
 	}
 }

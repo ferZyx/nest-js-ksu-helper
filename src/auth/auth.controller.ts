@@ -11,6 +11,7 @@ import { AuthService } from './auth.service'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { CreateUserDto } from '../users/dtos/create-user.dto'
 import { LoginUserDto } from '../users/dtos/login-user.dto'
+import { Public } from '../../dist/auth/public.decorator'
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -31,6 +32,7 @@ export class AuthController {
 		description: 'Пользователь с таким email-ом уже зарегестрирован'
 	})
 	@UsePipes(new ValidationPipe())
+	@Public()
 	@Post('/registration')
 	async registration(@Body() dto: CreateUserDto) {
 		return await this.authService.registration(dto)
@@ -42,11 +44,12 @@ export class AuthController {
 		description: 'Успешная авторизация'
 	})
 	@ApiResponse({
-		status: HttpStatus.BAD_REQUEST,
+		status: HttpStatus.UNAUTHORIZED,
 		description: 'Указаны некорректные данные'
 	})
 	@HttpCode(200)
 	@UsePipes(new ValidationPipe())
+	@Public()
 	@Post('/login')
 	async login(@Body() dto: LoginUserDto) {
 		return this.authService.login(dto)
