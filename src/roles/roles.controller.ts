@@ -48,7 +48,6 @@ export class RolesController {
 		description: 'Роль не найдена'
 	})
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@Delete()
 	async deleteRole(@Body() dto: CreateRoleDto) {

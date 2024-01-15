@@ -2,13 +2,15 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 import { InjectModel } from '@nestjs/mongoose'
-import { Group, GroupDocument, GroupTypeEnum } from '../schemas/groups.schema'
+import { Group, GroupDocument, GroupTypeEnum } from '../schemas/group.schema'
 import { Model } from 'mongoose'
+import { UsersService } from '../users/users.service'
 
 @Injectable()
 export class GroupsService {
 	constructor(
-		@InjectModel(Group.name) private groupModel: Model<GroupDocument>
+		@InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+		private readonly usersService: UsersService
 	) {}
 
 	async create(createGroupDto: CreateGroupDto, req: Request): Promise<Group> {
@@ -34,12 +36,17 @@ export class GroupsService {
 		return await this.groupModel.find({ members: userId }).exec()
 	}
 
-	findAll() {
-		return `This action returns all groups`
+	async findAll(): Promise<GroupDocument[]> {
+		const groups = await this.groupModel
+			.find()
+			.populate('owner', ',members')
+			.exec()
+		console.log(groups)
+		return groups
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} group`
+	findOne(id: string) {
+		return this.groupModel.findById(id).exec()
 	}
 
 	update(id: number, updateGroupDto: UpdateGroupDto) {

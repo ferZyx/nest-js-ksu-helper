@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import mongoose, { Types } from 'mongoose'
 
 export class CreateGroupDto {
 	@IsString({ message: 'Должно быть строкой' })
@@ -10,14 +11,14 @@ export class CreateGroupDto {
 	readonly type: string
 
 	@IsOptional()
-	owner?: string
+	owner?: Types.ObjectId
 
 	@IsOptional()
-	members?: string[]
+	members?: mongoose.Schema.Types.ObjectId[]
 
 	@IsOptional()
-	admins?: string[]
+	admins?: mongoose.Schema.Types.ObjectId[]
 
 	@IsOptional()
-	joinRequests?: string[]
+	joinRequests?: mongoose.Schema.Types.ObjectId[]
 }
