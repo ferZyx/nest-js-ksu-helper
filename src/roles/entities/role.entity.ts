@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
 import mongoose from 'mongoose'
 
-export class RoleDto {
+export class RoleEntity {
 	@ApiProperty({ example: 'User', description: 'Название роли' })
 	readonly name: string
 

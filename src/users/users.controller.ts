@@ -9,7 +9,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { User } from '../schemas/user.schema'
 import { UsersService } from './users.service'
-import { UserDto } from './dto/user.dto'
+import { UserEntity } from './entities/user.entity'
 import { Roles } from '../auth/roles-auth.decorator'
 
 @ApiTags('Пользователи')
@@ -39,6 +39,6 @@ export class UsersController {
 	@Get('me')
 	async getMe(@Req() request: Request) {
 		const user = await this.usersService.getMe(request)
-		return new UserDto(user.toObject())
+		return new UserEntity(user.toObject())
 	}
 }

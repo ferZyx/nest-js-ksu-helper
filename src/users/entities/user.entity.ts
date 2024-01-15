@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Transform, Type } from 'class-transformer'
 import mongoose from 'mongoose'
-import { RoleDto } from '../../roles/dto/role.dto'
+import { RoleEntity } from '../../roles/entities/role.entity'
 
-export class UserDto {
+export class UserEntity {
 	@ApiProperty({ example: 'user@gmail.com', description: 'Почтовый адрес' })
 	readonly email: string
 
@@ -21,12 +21,16 @@ export class UserDto {
 	@ApiProperty({
 		example: 'User',
 		description: 'Роли пользователя',
-		type: [RoleDto]
+		type: [RoleEntity]
 	})
-	@Type(() => RoleDto)
-	readonly roles: RoleDto[]
+	@Transform(({ value }) => value.map((role: { name: string }) => role.name))
+	@Type(() => RoleEntity)
+	readonly roles: RoleEntity[]
 
-	constructor(partial: Partial<UserDto>) {
+	@Exclude()
+	readonly __v: number
+
+	constructor(partial: Partial<UserEntity>) {
 		Object.assign(this, partial)
 	}
 }
