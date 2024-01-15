@@ -7,7 +7,7 @@ import {
 	UseInterceptors
 } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { User } from '../schemas/user.schema'
+import { User, UserDocument } from '../schemas/user.schema'
 import { UsersService } from './users.service'
 import { UserEntity } from './entities/user.entity'
 import { Roles } from '../auth/roles-auth.decorator'
@@ -23,10 +23,12 @@ export class UsersController {
 		status: HttpStatus.OK,
 		description: 'Успешное получение всех пользователей'
 	})
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
 	@Get()
-	getAll(): Promise<User[]> {
-		return this.usersService.getAll()
+	async getAll(): Promise<UserEntity[]> {
+		const users: UserDocument[] = await this.usersService.getAll()
+		return users.map((user: UserDocument) => new UserEntity(user.toObject()))
 	}
 
 	@ApiOperation({ summary: 'Получить инфу о себе.' })
@@ -37,8 +39,8 @@ export class UsersController {
 	})
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get('me')
-	async getMe(@Req() request: Request) {
-		const user = await this.usersService.getMe(request)
+	async getMe(@Req() request: Request): Promise<UserEntity> {
+		const user: UserDocument = await this.usersService.getMe(request)
 		return new UserEntity(user.toObject())
 	}
 }

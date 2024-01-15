@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { RolesService } from '../roles/roles.service'
+import { RoleDocument } from '../schemas/role.schema'
 
 @Injectable()
 export class UsersService {
@@ -14,11 +15,11 @@ export class UsersService {
 	) {}
 
 	getAll(): Promise<UserDocument[]> {
-		return this.userModel.find()
+		return this.userModel.find().populate('roles').exec()
 	}
 
 	async createUser(dto: CreateUserDto): Promise<UserDocument> {
-		const candidate = await this.findUserByEmail(dto.email)
+		const candidate: UserDocument = await this.findUserByEmail(dto.email)
 		if (candidate) {
 			throw new HttpException(
 				'Пользователь с таким email уже зарегистрирован!',
@@ -26,8 +27,11 @@ export class UsersService {
 			)
 		}
 
-		const userRole = await this.roleService.getRoleByName('User')
-		const user = await this.userModel.create({ ...dto, roles: [userRole._id] })
+		const userRole: RoleDocument = await this.roleService.getRoleByName('User')
+		const user: UserDocument = await this.userModel.create({
+			...dto,
+			roles: [userRole._id]
+		})
 		return user.populate('roles')
 	}
 
