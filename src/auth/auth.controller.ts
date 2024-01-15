@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { CreateUserDto } from '../users/dtos/create-user.dto'
-import { LoginUserDto } from '../users/dtos/login-user.dto'
+import { CreateUserDto } from '../users/dto/create-user.dto'
+import { LoginUserDto } from '../users/dto/login-user.dto'
 import { Public } from './public-route.decorator'
 
 @ApiTags('Авторизация')

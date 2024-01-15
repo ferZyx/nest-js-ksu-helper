@@ -9,7 +9,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { User } from '../schemas/user.schema'
 import { UsersService } from './users.service'
-import { UserDto } from './dtos/user.dto'
+import { UserDto } from './dto/user.dto'
 import { Roles } from '../auth/roles-auth.decorator'
 
 @ApiTags('Пользователи')
