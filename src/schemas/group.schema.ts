@@ -15,19 +15,33 @@ export class Group {
 	@Prop({ required: true })
 	name: string
 
-	@Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+	@Prop({
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User',
+		autopopulate: true
+	})
 	owner: User
 
 	@Prop({
-		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+		type: [
+			{ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+		],
 		required: true
 	})
 	members: User[]
 
-	@Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+	@Prop({
+		type: [
+			{ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+		]
+	})
 	joinRequests: User[]
 
-	@Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+	@Prop({
+		type: [
+			{ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+		]
+	})
 	admins: User[]
 
 	@Prop({ required: true, enum: GroupTypeEnum })

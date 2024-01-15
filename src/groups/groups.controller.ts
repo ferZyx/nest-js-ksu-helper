@@ -1,5 +1,6 @@
 import {
 	Body,
+	ClassSerializerInterceptor,
 	Controller,
 	Delete,
 	Get,
@@ -9,6 +10,7 @@ import {
 	Patch,
 	Post,
 	Req,
+	UseInterceptors,
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common'
@@ -18,6 +20,7 @@ import { UpdateGroupDto } from './dto/update-group.dto'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { Roles } from '../auth/roles-auth.decorator'
 import { Group, GroupDocument } from '../schemas/group.schema'
+import { GroupEntity } from './entities/group.entity'
 
 @Controller('groups')
 export class GroupsController {
@@ -29,21 +32,32 @@ export class GroupsController {
 		status: HttpStatus.CREATED,
 		description: 'Успешное создание группы'
 	})
+	@UseInterceptors(ClassSerializerInterceptor)
 	@UsePipes(new ValidationPipe())
 	@Post()
-	create(@Body() createGroupDto: CreateGroupDto, @Req() req: Request) {
-		return this.groupsService.create(createGroupDto, req)
+	async create(
+		@Body() createGroupDto: CreateGroupDto,
+		@Req() req: Request
+	): Promise<GroupEntity> {
+		const group: GroupDocument = await this.groupsService.create(
+			createGroupDto,
+			req
+		)
+		return new GroupEntity(group.toObject())
 	}
 
 	@ApiOperation({ summary: 'Получить все группы. Доступно админам' })
 	@ApiResponse({ type: [Group], status: HttpStatus.OK })
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
 	@Get()
-	findAll(): Promise<GroupDocument[]> {
-		return this.groupsService.findAll()
+	async findAll(): Promise<GroupEntity[]> {
+		const groups: GroupDocument[] = await this.groupsService.findAll()
+		return groups.map(
+			(group: GroupDocument) => new GroupEntity(group.toObject())
+		)
 	}
 
-	// Сделать нормальную валидацию
 	@ApiOperation({ summary: 'Найти группу по айди' })
 	@ApiResponse({
 		status: HttpStatus.OK,
@@ -54,9 +68,11 @@ export class GroupsController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Группа не найдена'
 	})
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.groupsService.findOne(id)
+	async findOne(@Param('id') id: string): Promise<GroupEntity> {
+		const group: GroupDocument = await this.groupsService.findOne(id)
+		return new GroupEntity(group.toObject())
 	}
 
 	// Доделать по уму

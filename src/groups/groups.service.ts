@@ -3,7 +3,7 @@ import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Group, GroupDocument, GroupTypeEnum } from '../schemas/group.schema'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 
 @Injectable()
 export class GroupsService {
@@ -11,7 +11,10 @@ export class GroupsService {
 		@InjectModel(Group.name) private groupModel: Model<GroupDocument>
 	) {}
 
-	async create(createGroupDto: CreateGroupDto, req: Request): Promise<Group> {
+	async create(
+		createGroupDto: CreateGroupDto,
+		req: Request
+	): Promise<GroupDocument> {
 		if (GroupTypeEnum[createGroupDto.type] === undefined) {
 			throw new HttpException('Invalid group type', HttpStatus.BAD_REQUEST)
 		}
@@ -28,8 +31,7 @@ export class GroupsService {
 		createGroupDto.admins = [user.id]
 		createGroupDto.joinRequests = []
 
-		const group = await this.groupModel.create(createGroupDto)
-		return group.populate('owner members joinRequests admins')
+		return await this.groupModel.create(createGroupDto)
 	}
 
 	async getGroupsForUser(userId: string): Promise<Group[]> {
@@ -37,17 +39,19 @@ export class GroupsService {
 	}
 
 	async findAll(): Promise<GroupDocument[]> {
-		return this.groupModel
-			.find()
-			.populate('owner members joinRequests admins')
-			.exec()
+		return this.groupModel.find().exec()
 	}
 
-	findOne(id: string) {
-		return this.groupModel
-			.findById(id)
-			.populate('owner members joinRequests admins')
-			.exec()
+	async findOne(id: string) {
+		const isIdValid = mongoose.Types.ObjectId.isValid(id)
+		if (!isIdValid) {
+			throw new HttpException('Invalid id', HttpStatus.BAD_REQUEST)
+		}
+		const group = await this.groupModel.findById(id).exec()
+		if (!group) {
+			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
+		}
+		return group
 	}
 
 	update(id: number, updateGroupDto: UpdateGroupDto) {
@@ -55,11 +59,11 @@ export class GroupsService {
 	}
 
 	async remove(id: string, userId: string) {
-		const group = await this.groupModel.findById(id).exec()
+		const group: GroupDocument = await this.groupModel.findById(id).exec()
 		if (!group) {
 			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
 		}
-		if (group.owner.toString() !== userId) {
+		if (String(group.owner['_id']) !== userId) {
 			throw new HttpException(
 				'User is not the owner of the group',
 				HttpStatus.FORBIDDEN

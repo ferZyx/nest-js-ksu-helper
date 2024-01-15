@@ -15,7 +15,7 @@ export class UsersService {
 	) {}
 
 	getAll(): Promise<UserDocument[]> {
-		return this.userModel.find().populate('roles').exec()
+		return this.userModel.find().exec()
 	}
 
 	async createUser(dto: CreateUserDto): Promise<UserDocument> {
@@ -28,19 +28,18 @@ export class UsersService {
 		}
 
 		const userRole: RoleDocument = await this.roleService.getRoleByName('User')
-		const user: UserDocument = await this.userModel.create({
+		return await this.userModel.create({
 			...dto,
 			roles: [userRole._id]
 		})
-		return user.populate('roles')
 	}
 
 	async findUserByEmail(email: string): Promise<UserDocument> {
-		return this.userModel.findOne({ email }).populate('roles')
+		return this.userModel.findOne({ email })
 	}
 
 	async findUserById(id: string): Promise<UserDocument> {
-		return this.userModel.findById(id).populate('roles')
+		return this.userModel.findById(id)
 	}
 
 	async getMe(request: Request): Promise<UserDocument> {

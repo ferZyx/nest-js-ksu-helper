@@ -11,7 +11,11 @@ import * as process from 'process'
 	imports: [
 		ConfigModule.forRoot({ envFilePath: '.env' }),
 		MongooseModule.forRoot(process.env.DB_URI, {
-			autoIndex: true
+			autoIndex: true,
+			connectionFactory: (connection) => {
+				connection.plugin(require('mongoose-autopopulate'))
+				return connection
+			}
 		}),
 		AuthModule,
 		RolesModule,

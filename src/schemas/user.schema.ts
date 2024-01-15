@@ -36,7 +36,8 @@ export class User {
 	})
 	@Prop({
 		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }],
-		required: true
+		required: true,
+		autopopulate: true
 	})
 	roles: Role[]
 }
