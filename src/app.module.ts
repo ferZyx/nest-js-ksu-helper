@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config'
 import { AuthModule } from './auth/auth.module'
 import { RolesModule } from './roles/roles.module'
 import { UsersModule } from './users/users.module'
+import { GroupsModule } from './groups/groups.module';
 import * as process from 'process'
 
 @Module({
@@ -14,7 +15,8 @@ import * as process from 'process'
 		}),
 		AuthModule,
 		RolesModule,
-		UsersModule
+		UsersModule,
+		GroupsModule
 	],
 	controllers: [],
 	providers: []
