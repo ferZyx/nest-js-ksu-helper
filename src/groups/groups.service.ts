@@ -4,13 +4,11 @@ import { UpdateGroupDto } from './dto/update-group.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Group, GroupDocument, GroupTypeEnum } from '../schemas/group.schema'
 import { Model } from 'mongoose'
-import { UsersService } from '../users/users.service'
 
 @Injectable()
 export class GroupsService {
 	constructor(
-		@InjectModel(Group.name) private groupModel: Model<GroupDocument>,
-		private readonly usersService: UsersService
+		@InjectModel(Group.name) private groupModel: Model<GroupDocument>
 	) {}
 
 	async create(createGroupDto: CreateGroupDto, req: Request): Promise<Group> {
@@ -29,7 +27,9 @@ export class GroupsService {
 		createGroupDto.members = [user.id]
 		createGroupDto.admins = [user.id]
 		createGroupDto.joinRequests = []
-		return this.groupModel.create(createGroupDto)
+
+		const group = await this.groupModel.create(createGroupDto)
+		return group.populate('owner members joinRequests admins')
 	}
 
 	async getGroupsForUser(userId: string): Promise<Group[]> {
@@ -37,16 +37,17 @@ export class GroupsService {
 	}
 
 	async findAll(): Promise<GroupDocument[]> {
-		const groups = await this.groupModel
+		return this.groupModel
 			.find()
-			.populate('owner', ',members')
+			.populate('owner members joinRequests admins')
 			.exec()
-		console.log(groups)
-		return groups
 	}
 
 	findOne(id: string) {
-		return this.groupModel.findById(id).exec()
+		return this.groupModel
+			.findById(id)
+			.populate('owner members joinRequests admins')
+			.exec()
 	}
 
 	update(id: number, updateGroupDto: UpdateGroupDto) {
