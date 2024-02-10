@@ -3,13 +3,14 @@ import { Exclude, Transform, Type } from 'class-transformer'
 import mongoose from 'mongoose'
 import { RoleEntity } from '../../roles/entities/role.entity'
 import { GroupEntity } from '../../groups/entities/group.entity'
+import { Group } from '../../schemas/group.schema'
 
 export class UserEntity {
 	@ApiProperty({ example: 'user@gmail.com', description: 'Почтовый адрес' })
 	readonly email: string
 
 	@Type(() => GroupEntity)
-	readonly groups: GroupEntity[]
+	readonly groups: Group[]
 
 	@ApiProperty({ example: '123123', description: 'Пароль' })
 	@Exclude()
