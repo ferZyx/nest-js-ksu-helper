@@ -17,7 +17,7 @@ import { GroupsModule } from '../groups/groups.module'
 			{ name: Role.name, schema: RoleSchema }
 		]),
 		RolesModule,
-		GroupsModule,
+		forwardRef(() => GroupsModule),
 		forwardRef(() => AuthModule)
 	],
 	providers: [UsersService]

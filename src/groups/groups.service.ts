@@ -4,6 +4,7 @@ import { UpdateGroupDto } from './dto/update-group.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Group, GroupDocument, GroupTypeEnum } from '../schemas/group.schema'
 import mongoose, { Model } from 'mongoose'
+import { UserDocument } from '../schemas/user.schema'
 
 @Injectable()
 export class GroupsService {
@@ -70,5 +71,32 @@ export class GroupsService {
 			)
 		}
 		return this.groupModel.findByIdAndDelete(id).exec()
+	}
+
+	async joinGroup(groupId: string, userId: string) {
+		const group: GroupDocument = await this.findOne(groupId)
+		if (group.type === GroupTypeEnum.private.toString()) {
+			throw new HttpException('Group is private', HttpStatus.FORBIDDEN)
+		}
+		if (
+			group.members.some(
+				(member: UserDocument) => String(member._id) === userId
+			)
+		) {
+			throw new HttpException(
+				'User is already in the group',
+				HttpStatus.BAD_REQUEST
+			)
+		}
+		// const user: UserDocument = await this.userService.findUserById(userId)
+		if (group.type === GroupTypeEnum.requests.toString()) {
+			// group.joinRequests.push(user)
+			await group.save()
+			return {
+				success: true,
+				message:
+					'Заявка на вступление успешно создана. Чи отправлена. Как лучше брат? или в жопу вообще тексты. Ты же тексты все на фронте хранишь да? Тогда логичнее просто какое то ключевое слово использовать для твоего этоого самого. ЧТобы он сам текст по этмоу ключу вытасиквал, ес?'
+			}
+		}
 	}
 }

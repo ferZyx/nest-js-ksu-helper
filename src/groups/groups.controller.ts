@@ -91,9 +91,17 @@ export class GroupsController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Группа не найдена'
 	})
-	@HttpCode(204)
+	@HttpCode(HttpStatus.NO_CONTENT)
 	@Delete(':id')
 	remove(@Param('id') id: string, @Req() req: Request) {
 		return this.groupsService.remove(id, req['user'].id)
+	}
+
+	@ApiOperation({ summary: 'Вступить в группу' })
+	@ApiResponse({ status: HttpStatus.OK, description: 'Успешное вступление' })
+	@HttpCode(HttpStatus.OK)
+	@Post(':id/join')
+	joinGroup(@Param('id') groupId: string, @Req() req: Request) {
+		return this.groupsService.joinGroup(groupId, req['user'].id)
 	}
 }
