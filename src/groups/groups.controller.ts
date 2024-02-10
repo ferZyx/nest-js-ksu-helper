@@ -17,20 +17,21 @@ import {
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Roles } from '../auth/roles-auth.decorator'
 import { Group, GroupDocument } from '../schemas/group.schema'
 import { GroupEntity } from './entities/group.entity'
 
+@ApiTags('Группы')
 @Controller('groups')
 export class GroupsController {
 	constructor(private readonly groupsService: GroupsService) {}
 
 	@ApiOperation({ summary: 'Создать группу' })
 	@ApiResponse({
-		type: Group,
 		status: HttpStatus.CREATED,
-		description: 'Успешное создание группы'
+		description: 'Успешное создание группы',
+		type: Group
 	})
 	@UseInterceptors(ClassSerializerInterceptor)
 	@UsePipes(new ValidationPipe())

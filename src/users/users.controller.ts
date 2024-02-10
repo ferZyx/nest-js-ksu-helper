@@ -40,7 +40,8 @@ export class UsersController {
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get('me')
 	async getMe(@Req() request: Request): Promise<UserEntity> {
-		const user: UserDocument = await this.usersService.getMe(request)
-		return new UserEntity(user.toObject())
+		const { userData, userGroups } = await this.usersService.getMe(request)
+		const groups = userGroups.map((group: any) => group.toObject())
+		return new UserEntity({ ...userData.toObject(), groups })
 	}
 }

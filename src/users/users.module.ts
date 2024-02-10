@@ -6,6 +6,7 @@ import { RolesModule } from '../roles/roles.module'
 import { User, UserSchema } from '../schemas/user.schema'
 import { Role, RoleSchema } from '../schemas/role.schema'
 import { AuthModule } from '../auth/auth.module'
+import { GroupsModule } from '../groups/groups.module'
 
 @Module({
 	controllers: [UsersController],
@@ -16,6 +17,7 @@ import { AuthModule } from '../auth/auth.module'
 			{ name: Role.name, schema: RoleSchema }
 		]),
 		RolesModule,
+		GroupsModule,
 		forwardRef(() => AuthModule)
 	],
 	providers: [UsersService]

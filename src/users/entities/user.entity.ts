@@ -2,10 +2,14 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Transform, Type } from 'class-transformer'
 import mongoose from 'mongoose'
 import { RoleEntity } from '../../roles/entities/role.entity'
+import { GroupEntity } from '../../groups/entities/group.entity'
 
 export class UserEntity {
 	@ApiProperty({ example: 'user@gmail.com', description: 'Почтовый адрес' })
 	readonly email: string
+
+	@Type(() => GroupEntity)
+	readonly groups: GroupEntity[]
 
 	@ApiProperty({ example: '123123', description: 'Пароль' })
 	@Exclude()

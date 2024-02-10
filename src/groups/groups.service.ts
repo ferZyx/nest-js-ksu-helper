@@ -34,7 +34,7 @@ export class GroupsService {
 		return await this.groupModel.create(createGroupDto)
 	}
 
-	async getGroupsForUser(userId: string): Promise<Group[]> {
+	async getGroupsForUser(userId: string): Promise<GroupDocument[]> {
 		return await this.groupModel.find({ members: userId }).exec()
 	}
 
