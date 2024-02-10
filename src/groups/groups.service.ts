@@ -1,16 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Group, GroupDocument, GroupTypeEnum } from '../schemas/group.schema'
 import mongoose, { Model } from 'mongoose'
 import { UserDocument } from '../schemas/user.schema'
+import { UsersService } from 'src/users/users.service'
 
 @Injectable()
 export class GroupsService {
 	constructor(
-		@InjectModel(Group.name) private groupModel: Model<GroupDocument>
-	) {}
+		@InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+		@Inject(forwardRef(() => UsersService))
+		private readonly usersService: UsersService
+	) { }
 
 	async create(
 		createGroupDto: CreateGroupDto,
