@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common'
+import {
+	forwardRef,
+	HttpException,
+	HttpStatus,
+	Inject,
+	Injectable
+} from '@nestjs/common'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -13,7 +19,7 @@ export class GroupsService {
 		@InjectModel(Group.name) private groupModel: Model<GroupDocument>,
 		@Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService
-	) { }
+	) {}
 
 	async create(
 		createGroupDto: CreateGroupDto,
@@ -78,8 +84,8 @@ export class GroupsService {
 
 	async joinGroup(groupId: string, userId: string) {
 		const group: GroupDocument = await this.findOne(groupId)
-		if (group.type === GroupTypeEnum.private.toString()) {
-			throw new HttpException('Group is private', HttpStatus.FORBIDDEN)
+		if (!group) {
+			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
 		}
 		if (
 			group.members.some(
@@ -91,15 +97,31 @@ export class GroupsService {
 				HttpStatus.BAD_REQUEST
 			)
 		}
-		// const user: UserDocument = await this.userService.findUserById(userId)
-		if (group.type === GroupTypeEnum.requests.toString()) {
-			// group.joinRequests.push(user)
+		if (GroupTypeEnum[group.type] === GroupTypeEnum.private) {
+			throw new HttpException('Group is private', HttpStatus.FORBIDDEN)
+		}
+
+		const user: UserDocument = await this.usersService.findUserById(userId)
+		if (GroupTypeEnum[group.type] === GroupTypeEnum.requests) {
+			group.joinRequests.push(user)
 			await group.save()
 			return {
 				success: true,
 				message:
-					'Заявка на вступление успешно создана. Чи отправлена. Как лучше брат? или в жопу вообще тексты. Ты же тексты все на фронте хранишь да? Тогда логичнее просто какое то ключевое слово использовать для твоего этоого самого. ЧТобы он сам текст по этмоу ключу вытасиквал, ес?'
+					'Заявка на вступление успешно создана. Или отправлена?. Как лучше брат? или в жопу вообще тексты. Ты же тексты все на фронте хранишь да? Тогда логичнее просто какое то ключевое слово использовать для твоего этоого самого. ЧТобы он сам текст по этмоу ключу вытасиквал, ес?'
 			}
+		}
+		if (GroupTypeEnum[group.type] === GroupTypeEnum.public) {
+			group.members.push(user)
+			await group.save()
+			return {
+				success: true,
+				message: 'Вы вступили в группу'
+			}
+		}
+		return {
+			success: false,
+			message: 'Что-то пошло не так'
 		}
 	}
 }
