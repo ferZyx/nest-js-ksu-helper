@@ -12,13 +12,15 @@ import { Group, GroupDocument, GroupTypeEnum } from '../schemas/group.schema'
 import mongoose, { Model } from 'mongoose'
 import { UserDocument } from '../schemas/user.schema'
 import { UsersService } from 'src/users/users.service'
+import { NotificationsService } from '../notifications/notifications.service'
 
 @Injectable()
 export class GroupsService {
 	constructor(
 		@InjectModel(Group.name) private groupModel: Model<GroupDocument>,
 		@Inject(forwardRef(() => UsersService))
-		private readonly usersService: UsersService
+		private readonly usersService: UsersService,
+		private readonly notificationsService: NotificationsService
 	) {}
 
 	async create(
@@ -83,7 +85,7 @@ export class GroupsService {
 	}
 
 	async joinGroup(groupId: string, userId: string) {
-		const group: GroupDocument = await this.findOne(groupId)
+		const group: GroupDocument = await this.groupModel.findById(groupId)
 		if (!group) {
 			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
 		}
@@ -122,6 +124,48 @@ export class GroupsService {
 		return {
 			success: false,
 			message: 'Что-то пошло не так'
+		}
+	}
+
+	async acceptRequest(groupId: string, userId: string, adminId: string) {
+		const group: GroupDocument = await this.groupModel.findById(groupId)
+		if (!group) {
+			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
+		}
+		if (
+			!group.admins.some((admin: UserDocument) => String(admin._id) === adminId)
+		) {
+			throw new HttpException(
+				'You are not an admin of the group',
+				HttpStatus.FORBIDDEN
+			)
+		}
+		const user: UserDocument = await this.usersService.findUserById(userId)
+		if (!user) {
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+		}
+		if (
+			!group.joinRequests.some(
+				(request: UserDocument) => String(request._id) === userId
+			)
+		) {
+			throw new HttpException('Request not found', HttpStatus.NOT_FOUND)
+		}
+		// мб тут проблема будет
+		group.joinRequests = group.joinRequests.filter(
+			(request: UserDocument) => String(request.id) !== userId
+		)
+		group.members.push(user)
+		await group.save()
+
+		await this.notificationsService.createRequestAcceptedNotification(
+			user.id,
+			group.id
+		)
+
+		return {
+			success: true,
+			message: 'Пользователь принят в группу'
 		}
 	}
 }

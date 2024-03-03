@@ -58,7 +58,7 @@ export class UsersService {
 			await this.notificationsService.findByUserId(userId)
 		return {
 			...userData.toObject(),
-			group: userGroup.toObject(),
+			group: userGroup?.toObject(),
 			notifications: userNotifications.map(
 				(notification: NotificationDocument) => notification.toObject()
 			)

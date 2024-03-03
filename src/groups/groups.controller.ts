@@ -97,11 +97,30 @@ export class GroupsController {
 		return this.groupsService.remove(id, req['user'].id)
 	}
 
+	// по уму статус коды надо сделать
 	@ApiOperation({ summary: 'Вступить в группу' })
-	@ApiResponse({ status: HttpStatus.OK, description: 'Успешное вступление' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Успешное вступление/отправлена заявка'
+	})
 	@HttpCode(HttpStatus.OK)
 	@Post(':id/join')
 	joinGroup(@Param('id') groupId: string, @Req() req: Request) {
 		return this.groupsService.joinGroup(groupId, req['user'].id)
+	}
+
+	@ApiOperation({ summary: 'Вступить в группу' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Успешное вступление/отправлена заявка'
+	})
+	@HttpCode(HttpStatus.OK)
+	@Post(':id/join/accept/:userId')
+	acceptRequest(
+		@Param('id') groupId: string,
+		@Param('userId') userId: string,
+		@Req() req: Request
+	) {
+		return this.groupsService.acceptRequest(groupId, userId, req['user'].id)
 	}
 }

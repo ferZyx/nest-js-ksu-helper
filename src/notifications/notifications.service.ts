@@ -19,6 +19,14 @@ export class NotificationsService {
 		return this.notificationModel.create(createNotificationDto)
 	}
 
+	createRequestAcceptedNotification( userId: string, groupId: string): Promise<NotificationDocument> {
+		return this.notificationModel.create({
+			title: "Request Accepted",
+			message: `Your request to join group ${groupId} has been accepted`,
+			user: userId
+		})
+	}
+
 	findAll() {
 		return this.notificationModel.find().exec()
 	}
