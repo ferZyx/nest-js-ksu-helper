@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Transform, Type } from 'class-transformer'
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import { RoleEntity } from '../../roles/entities/role.entity'
 import { GroupEntity } from '../../groups/entities/group.entity'
 import { Group } from '../../schemas/group.schema'
+import { NotificationEntity } from '../../notifications/entities/notification.entity'
 
 export class UserEntity {
 	@ApiProperty({ example: 'user@gmail.com', description: 'Почтовый адрес' })
@@ -11,6 +12,9 @@ export class UserEntity {
 
 	@Type(() => GroupEntity)
 	readonly groups: Group[]
+
+	@Type(() => NotificationEntity)
+	readonly notifications: NotificationEntity[]
 
 	@ApiProperty({ example: '123123', description: 'Пароль' })
 	@Exclude()
@@ -21,7 +25,7 @@ export class UserEntity {
 		description: 'Уникальный идентификатор'
 	})
 	@Transform(({ value }) => value.toString())
-	_id: mongoose.Schema.Types.ObjectId
+	_id: Types.ObjectId
 
 	@ApiProperty({
 		example: 'User',

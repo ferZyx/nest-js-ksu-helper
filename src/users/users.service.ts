@@ -7,6 +7,8 @@ import { RolesService } from '../roles/roles.service'
 import { RoleDocument } from '../schemas/role.schema'
 import { GroupsService } from '../groups/groups.service'
 import { GroupDocument } from '../schemas/group.schema'
+import { NotificationsService } from '../notifications/notifications.service'
+import { NotificationDocument } from '../schemas/notification.schema'
 
 @Injectable()
 export class UsersService {
@@ -14,7 +16,8 @@ export class UsersService {
 		@InjectModel(User.name)
 		private readonly userModel: Model<UserDocument>,
 		private readonly roleService: RolesService,
-		private readonly groupService: GroupsService
+		private readonly groupService: GroupsService,
+		private readonly notificationsService: NotificationsService
 	) {}
 
 	getAll(): Promise<UserDocument[]> {
@@ -47,12 +50,19 @@ export class UsersService {
 
 	async getMe(request: Request) {
 		const userId = request['user'].id
+
 		const userData: UserDocument = await this.findUserById(userId)
 		const userGroups: GroupDocument[] =
 			await this.groupService.getGroupsForUser(userId)
+		const userNotifications =
+			await this.notificationsService.findByUserId(userId)
+		console.log(userNotifications)
 		return {
-			userData,
-			userGroups
+			...userData.toObject(),
+			groups: userGroups.map((group: GroupDocument) => group.toObject()),
+			notifications: userNotifications.map(
+				(notification: NotificationDocument) => notification.toObject()
+			)
 		}
 	}
 }

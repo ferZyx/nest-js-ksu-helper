@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module'
 import { RolesModule } from './roles/roles.module'
 import { UsersModule } from './users/users.module'
 import { GroupsModule } from './groups/groups.module'
+import { NotificationsModule } from './notifications/notifications.module';
 import * as process from 'process'
 
 @Module({
@@ -20,7 +21,8 @@ import * as process from 'process'
 		AuthModule,
 		RolesModule,
 		UsersModule,
-		GroupsModule
+		GroupsModule,
+		NotificationsModule
 	],
 	controllers: [],
 	providers: []

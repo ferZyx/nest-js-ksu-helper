@@ -11,7 +11,6 @@ import { User, UserDocument } from '../schemas/user.schema'
 import { UsersService } from './users.service'
 import { UserEntity } from './entities/user.entity'
 import { Roles } from '../auth/roles-auth.decorator'
-import { GroupDocument } from '../schemas/group.schema'
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -41,8 +40,7 @@ export class UsersController {
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get('me')
 	async getMe(@Req() request: Request): Promise<UserEntity> {
-		const { userData, userGroups } = await this.usersService.getMe(request)
-		const groups = userGroups.map((group: GroupDocument) => group.toObject())
-		return new UserEntity({ ...userData.toObject(), groups })
+		const userData = await this.usersService.getMe(request)
+		return new UserEntity(userData)
 	}
 }
