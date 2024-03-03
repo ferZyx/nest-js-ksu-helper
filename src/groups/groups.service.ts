@@ -28,8 +28,8 @@ export class GroupsService {
 		if (GroupTypeEnum[createGroupDto.type] === undefined) {
 			throw new HttpException('Invalid group type', HttpStatus.BAD_REQUEST)
 		}
-		const userGroups = await this.getGroupsForUser(req['user'].id)
-		if (userGroups.length) {
+		const userGroup = await this.getGroupForUser(req['user'].id)
+		if (userGroup) {
 			throw new HttpException(
 				'User already has a group',
 				HttpStatus.BAD_REQUEST
@@ -44,8 +44,8 @@ export class GroupsService {
 		return await this.groupModel.create(createGroupDto)
 	}
 
-	async getGroupsForUser(userId: string): Promise<GroupDocument[]> {
-		return await this.groupModel.find({ members: userId }).exec()
+	async getGroupForUser(userId: string): Promise<GroupDocument> {
+		return await this.groupModel.findOne({ members: userId }).exec()
 	}
 
 	async findAll(): Promise<GroupDocument[]> {

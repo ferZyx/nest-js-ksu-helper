@@ -52,14 +52,13 @@ export class UsersService {
 		const userId = request['user'].id
 
 		const userData: UserDocument = await this.findUserById(userId)
-		const userGroups: GroupDocument[] =
-			await this.groupService.getGroupsForUser(userId)
+		const userGroup: GroupDocument =
+			await this.groupService.getGroupForUser(userId)
 		const userNotifications =
 			await this.notificationsService.findByUserId(userId)
-		console.log(userNotifications)
 		return {
 			...userData.toObject(),
-			groups: userGroups.map((group: GroupDocument) => group.toObject()),
+			group: userGroup.toObject(),
 			notifications: userNotifications.map(
 				(notification: NotificationDocument) => notification.toObject()
 			)

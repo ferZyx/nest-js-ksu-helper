@@ -11,7 +11,7 @@ export class UserEntity {
 	readonly email: string
 
 	@Type(() => GroupEntity)
-	readonly groups: Group[]
+	readonly group: Group
 
 	@Type(() => NotificationEntity)
 	readonly notifications: NotificationEntity[]
