@@ -18,7 +18,6 @@ export class Notification {
 	@Prop({ required: true })
 	message: string
 
-
 	@ApiProperty({ example: 'Some title', description: 'Заголовок' })
 	@Prop({ required: true })
 	title: string
