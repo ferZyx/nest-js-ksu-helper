@@ -3,6 +3,7 @@ import { AppModule } from './app.module'
 import * as process from 'process'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as cookieParser from 'cookie-parser'
+import { ValidationPipe } from '@nestjs/common'
 
 async function bootstrap() {
 	const PORT = process.env.PORT || 5000
@@ -17,6 +18,12 @@ async function bootstrap() {
 	})
 	app.use(cookieParser())
 	app.setGlobalPrefix('api')
+
+	app.useGlobalPipes(
+		new ValidationPipe({
+			whitelist: true
+		})
+	)
 
 	const config = new DocumentBuilder()
 		.setTitle('Апишечка от бога')
