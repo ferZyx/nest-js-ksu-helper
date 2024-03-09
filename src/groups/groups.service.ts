@@ -67,19 +67,23 @@ export class GroupsService {
 		return `This action updates a #${id} group`
 	}
 
-	// async remove(id: string, userId: string) {
-	// 	const group: GroupDocument = await this.groupModel.findById(id).exec()
-	// 	if (!group) {
-	// 		throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
-	// 	}
-	// 	if (String(group.owner['_id']) !== userId) {
-	// 		throw new HttpException(
-	// 			'User is not the owner of the group',
-	// 			HttpStatus.FORBIDDEN
-	// 		)
-	// 	}
-	// 	return this.groupModel.findByIdAndDelete(id).exec()
-	// }
+	async remove(groupId: string, userId: string) {
+		const group: GroupDocument = await this.groupModel.findById(groupId).exec()
+		if (!group) {
+			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
+		}
+		const user = await this.usersService.findUserById(userId)
+		if (
+			String(user.group) !== groupId ||
+			user.groupRole !== GroupRolesEnum.owner
+		) {
+			throw new HttpException(
+				'User is not the owner of the group',
+				HttpStatus.FORBIDDEN
+			)
+		}
+		return this.groupModel.findByIdAndDelete(groupId).exec()
+	}
 
 	// async joinGroup(groupId: string, userId: string) {
 	// 	const group: GroupDocument = await this.groupModel.findById(groupId)

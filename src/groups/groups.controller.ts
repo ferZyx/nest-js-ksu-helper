@@ -2,7 +2,9 @@ import {
 	Body,
 	ClassSerializerInterceptor,
 	Controller,
+	Delete,
 	Get,
+	HttpCode,
 	HttpStatus,
 	Param,
 	Patch,
@@ -93,20 +95,23 @@ export class GroupsController {
 		return this.groupsService.update(+id, updateGroupDto)
 	}
 
-	// @ApiOperation({ summary: 'Удалить группу. Может только владелец группы' })
-	// @ApiResponse({
-	// 	status: HttpStatus.NO_CONTENT,
-	// 	description: 'Группа успешно удалена'
-	// })
-	// @ApiResponse({
-	// 	status: HttpStatus.NOT_FOUND,
-	// 	description: 'Группа не найдена'
-	// })
-	// @HttpCode(HttpStatus.NO_CONTENT)
-	// @Delete(':id')
-	// remove(@Param('id') id: string, @Req() req: Request) {
-	// 	return this.groupsService.remove(id, req['user'].id)
-	// }
+	@ApiOperation({
+		summary:
+			'[need fix (При удалении удалять инфу о группу у каждого юзера)] Удалить группу. Может только владелец группы'
+	})
+	@ApiResponse({
+		status: HttpStatus.NO_CONTENT,
+		description: 'Группа успешно удалена'
+	})
+	@ApiResponse({
+		status: HttpStatus.NOT_FOUND,
+		description: 'Группа не найдена'
+	})
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@Delete(':id')
+	remove(@Param('id') groupId: string, @Req() req: Request) {
+		return this.groupsService.remove(groupId, req['user'].id)
+	}
 
 	// по уму статус коды надо сделать
 	// @ApiOperation({ summary: 'Вступить в группу' })
