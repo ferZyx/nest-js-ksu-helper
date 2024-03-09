@@ -3,9 +3,9 @@ import { Exclude, Transform, Type } from 'class-transformer'
 import { Types } from 'mongoose'
 import { RoleEntity } from '../../roles/entities/role.entity'
 import { GroupEntity } from '../../groups/entities/group.entity'
-import { NotificationEntity } from '../../notifications/entities/notification.entity'
 import { Group } from '../../schemas/group.schema'
 import { Notification } from '../../schemas/notification.schema'
+import { UserNotificationEntity } from '../../notifications/entities/user-notification.entity'
 
 export class UserEntity {
 	@ApiProperty({ example: 'user@gmail.com', description: 'Почтовый адрес' })
@@ -15,9 +15,9 @@ export class UserEntity {
 	@Type(() => GroupEntity)
 	readonly group: Group
 
-	// group role field
+	readonly groupRole: string
 
-	@Type(() => NotificationEntity)
+	@Type(() => UserNotificationEntity)
 	readonly notifications: Notification[]
 
 	@ApiProperty({ example: '123123', description: 'Пароль' })
