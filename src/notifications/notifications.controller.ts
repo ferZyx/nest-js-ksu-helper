@@ -4,6 +4,8 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
+	HttpStatus,
 	Param,
 	Patch,
 	Post,
@@ -13,7 +15,7 @@ import { NotificationsService } from './notifications.service'
 import { CreateNotificationDto } from './dto/create-notification.dto'
 import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { Roles } from '../auth/roles-auth.decorator'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { NotificationEntity } from './entities/notification.entity'
 import { NotificationDocument } from '../schemas/notification.schema'
 import { ParseObjectIdPipe } from '../pipes/parse-object-id.pipe'
@@ -47,25 +49,35 @@ export class NotificationsController {
 	}
 
 	@ApiOperation({ summary: 'Получить уведомление по id. Доступно админам' })
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
 	@Get(':id')
-	findOne(@Param('id', ParseObjectIdPipe) id: string) {
-		return this.notificationsService.findOne(+id)
+	async findOne(
+		@Param('id', ParseObjectIdPipe) id: string
+	): Promise<NotificationEntity> {
+		const notification: NotificationDocument =
+			await this.notificationsService.findOne(id)
+		return new NotificationEntity(notification.toObject())
 	}
 
 	@ApiOperation({ summary: 'Обновить уведомление по id' })
 	@Patch(':id')
 	update(
-		@Param('id') id: string,
+		@Param('id', ParseObjectIdPipe) id: string,
 		@Body() updateNotificationDto: UpdateNotificationDto
 	) {
-		return this.notificationsService.update(+id, updateNotificationDto)
+		return this.notificationsService.update(id, updateNotificationDto)
 	}
 
 	@ApiOperation({ summary: 'Удалить уведомление по id. Доступно админам' })
 	@Roles('Admin')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiResponse({
+		status: HttpStatus.NO_CONTENT,
+		description: 'Успешно удалено'
+	})
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.notificationsService.remove(+id)
+	remove(@Param('id', ParseObjectIdPipe) id: string) {
+		return this.notificationsService.remove(id)
 	}
 }

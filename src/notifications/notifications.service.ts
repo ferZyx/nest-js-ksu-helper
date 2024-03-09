@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateNotificationDto } from './dto/create-notification.dto'
 import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -19,9 +19,12 @@ export class NotificationsService {
 		return this.notificationModel.create(createNotificationDto)
 	}
 
-	createRequestAcceptedNotification( userId: string, groupId: string): Promise<NotificationDocument> {
+	createRequestAcceptedNotification(
+		userId: string,
+		groupId: string
+	): Promise<NotificationDocument> {
 		return this.notificationModel.create({
-			title: "Request Accepted",
+			title: 'Request Accepted',
 			message: `Your request to join group ${groupId} has been accepted`,
 			user: userId
 		})
@@ -31,16 +34,32 @@ export class NotificationsService {
 		return this.notificationModel.find().exec()
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} notification`
+	async findOne(id: string): Promise<NotificationDocument> {
+		const notification = await this.notificationModel.findById(id).exec()
+		if (!notification) {
+			throw new NotFoundException('Notification not found')
+		}
+		return notification
 	}
 
-	update(id: number, updateNotificationDto: UpdateNotificationDto) {
-		return `This action updates a #${id} notification`
+	async update(id: string, updateNotificationDto: UpdateNotificationDto) {
+		const notification = await this.notificationModel
+			.findByIdAndUpdate(id, updateNotificationDto, { new: true })
+			.exec()
+		if (!notification) {
+			throw new NotFoundException('Notification not found')
+		}
+		return notification
 	}
 
-	remove(id: number) {
-		return this.notificationModel.findByIdAndDelete(id).exec()
+	async remove(id: string): Promise<NotificationDocument> {
+		const deletedNotification = await this.notificationModel
+			.findByIdAndDelete(id)
+			.exec()
+		if (!deletedNotification) {
+			throw new NotFoundException('Notification not found')
+		}
+		return
 	}
 
 	findByUserId(userId: string): Promise<NotificationDocument[]> {
