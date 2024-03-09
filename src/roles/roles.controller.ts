@@ -6,14 +6,12 @@ import {
 	HttpCode,
 	HttpStatus,
 	Param,
-	Post,
-	UseGuards
+	Post
 } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Role } from '../schemas/role.schema'
-import { RolesAuthGuard } from '../auth/roles-auth.guard'
 import { Roles } from '../auth/roles-auth.decorator'
 
 @ApiTags('Роли пользователей')
@@ -32,7 +30,6 @@ export class RolesController {
 		description: 'Роль уже существует'
 	})
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
 	@Post()
 	async createRole(@Body() dto: CreateRoleDto) {
 		return this.rolesService.createRole(dto)
@@ -65,7 +62,6 @@ export class RolesController {
 		description: 'Роль не найдена'
 	})
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
 	@Get('/:name')
 	async getRoleByName(@Param('name') name: string) {
 		return this.rolesService.getRoleByName(name)
