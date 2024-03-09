@@ -1,21 +1,22 @@
 import {
 	Body,
+	ClassSerializerInterceptor,
 	Controller,
 	Delete,
 	Get,
 	Param,
 	Patch,
 	Post,
-	UseGuards,
-	UsePipes,
-	ValidationPipe
+	UseInterceptors
 } from '@nestjs/common'
 import { NotificationsService } from './notifications.service'
 import { CreateNotificationDto } from './dto/create-notification.dto'
 import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { Roles } from '../auth/roles-auth.decorator'
-import { RolesAuthGuard } from '../auth/roles-auth.guard'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { NotificationEntity } from './entities/notification.entity'
+import { NotificationDocument } from '../schemas/notification.schema'
+import { ParseObjectIdPipe } from '../pipes/parse-object-id.pipe'
 
 @ApiTags('Уведомления')
 @Controller('notifications')
@@ -24,27 +25,31 @@ export class NotificationsController {
 
 	@ApiOperation({ summary: 'Создать уведомление. Доступно админам' })
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
-	@UsePipes(new ValidationPipe())
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Post()
-	create(@Body() createNotificationDto: CreateNotificationDto) {
-		console.log(createNotificationDto)
-		return this.notificationsService.create(createNotificationDto)
+	async create(
+		@Body() createNotificationDto: CreateNotificationDto
+	): Promise<NotificationEntity> {
+		const notification: NotificationDocument =
+			await this.notificationsService.create(createNotificationDto)
+		return new NotificationEntity(notification.toObject())
 	}
 
 	@ApiOperation({ summary: 'Получить все уведомления. Доступно админам' })
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get()
-	findAll() {
-		return this.notificationsService.findAll()
+	async findAll(): Promise<NotificationEntity[]> {
+		const notifications = await this.notificationsService.findAll()
+		return notifications.map(
+			(notification) => new NotificationEntity(notification.toObject())
+		)
 	}
 
 	@ApiOperation({ summary: 'Получить уведомление по id. Доступно админам' })
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
 	@Get(':id')
-	findOne(@Param('id') id: string) {
+	findOne(@Param('id', ParseObjectIdPipe) id: string) {
 		return this.notificationsService.findOne(+id)
 	}
 
@@ -59,7 +64,6 @@ export class NotificationsController {
 
 	@ApiOperation({ summary: 'Удалить уведомление по id. Доступно админам' })
 	@Roles('Admin')
-	@UseGuards(RolesAuthGuard)
 	@Delete(':id')
 	remove(@Param('id') id: string) {
 		return this.notificationsService.remove(+id)
