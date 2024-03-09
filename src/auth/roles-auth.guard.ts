@@ -25,21 +25,26 @@ export class RolesAuthGuard implements CanActivate {
 			context.getHandler(),
 			context.getClass()
 		])
+		// Если есть декоратор @Public, то пропускаем запрос
 		if (isPublic) {
 			return true
 		}
 
+		// Проверяем авторизован ли и вытаскиваем роли пользователя
+		const request = context.switchToHttp().getRequest()
+		this.authCheck(request)
+
+		// Проверяем требуемые роли для доступа к ресурсу указанные в @Roles декораторе
 		const requiredRoles = this.reflector.getAllAndOverride<string[]>(
 			ROLES_KEY,
 			[context.getHandler(), context.getClass()]
 		)
 
-		const request = context.switchToHttp().getRequest()
-		this.authCheck(request)
-
+		// Если роли не указаны, то пропускаем запрос
 		if (!requiredRoles) {
 			return true
 		}
+
 		const userRoles = request.user?.roles
 		return userRoles.some((role: { name: string }) => {
 			return requiredRoles.includes(role.name)
