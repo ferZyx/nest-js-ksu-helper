@@ -15,6 +15,8 @@ export class UserEntity {
 	@Type(() => GroupEntity)
 	readonly group: Group
 
+	// group role field
+
 	@Type(() => NotificationEntity)
 	readonly notifications: Notification[]
 
@@ -27,7 +29,7 @@ export class UserEntity {
 		description: 'Уникальный идентификатор'
 	})
 	@Transform(({ value }) => value.toString())
-	_id: Types.ObjectId
+	readonly _id: Types.ObjectId
 
 	@ApiProperty({
 		example: 'User',

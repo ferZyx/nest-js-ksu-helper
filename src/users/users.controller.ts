@@ -41,7 +41,6 @@ export class UsersController {
 	@Get('me')
 	async getMe(@Req() request: Request): Promise<UserEntity> {
 		const userData = await this.usersService.getMe(request)
-		console.log(userData)
 		return new UserEntity(userData)
 	}
 }

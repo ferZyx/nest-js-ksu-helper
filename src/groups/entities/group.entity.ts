@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import { Exclude, Transform, Type } from 'class-transformer'
 import { UserEntity } from '../../users/entities/user.entity'
 import { ApiProperty } from '@nestjs/swagger'
+import { User } from '../../schemas/user.schema'
 
 export class GroupEntity {
 	readonly name: string
@@ -16,13 +17,7 @@ export class GroupEntity {
 	_id: mongoose.Schema.Types.ObjectId
 
 	@Type(() => UserEntity)
-	owner: mongoose.Schema.Types.ObjectId
-
-	@Type(() => UserEntity)
-	members: mongoose.Schema.Types.ObjectId[]
-
-	@Type(() => UserEntity)
-	admins: mongoose.Schema.Types.ObjectId[]
+	members: User[]
 
 	@Type(() => UserEntity)
 	joinRequests: mongoose.Schema.Types.ObjectId[]

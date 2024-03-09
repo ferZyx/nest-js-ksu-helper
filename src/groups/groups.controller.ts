@@ -2,9 +2,7 @@ import {
 	Body,
 	ClassSerializerInterceptor,
 	Controller,
-	Delete,
 	Get,
-	HttpCode,
 	HttpStatus,
 	Param,
 	Patch,
@@ -21,11 +19,16 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Roles } from '../auth/roles-auth.decorator'
 import { Group, GroupDocument } from '../schemas/group.schema'
 import { GroupEntity } from './entities/group.entity'
+import { UsersService } from '../users/users.service'
+import { UserDocument } from '../schemas/user.schema'
 
 @ApiTags('Группы')
 @Controller('groups')
 export class GroupsController {
-	constructor(private readonly groupsService: GroupsService) {}
+	constructor(
+		private readonly groupsService: GroupsService,
+		private readonly usersService: UsersService
+	) {}
 
 	@ApiOperation({ summary: 'Создать группу' })
 	@ApiResponse({
@@ -47,7 +50,10 @@ export class GroupsController {
 		return new GroupEntity(group.toObject())
 	}
 
-	@ApiOperation({ summary: 'Получить все группы. Доступно админам' })
+	// переделать
+	@ApiOperation({
+		summary: '[!need fix!] Получить все группы. Доступно админам'
+	})
 	@ApiResponse({ type: [Group], status: HttpStatus.OK })
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
@@ -73,7 +79,12 @@ export class GroupsController {
 	@Get(':id')
 	async findOne(@Param('id') id: string): Promise<GroupEntity> {
 		const group: GroupDocument = await this.groupsService.findOne(id)
-		return new GroupEntity(group.toObject())
+		const groupMembers: UserDocument[] =
+			await this.usersService.getGroupMembers(id)
+		return new GroupEntity({
+			...group.toObject(),
+			members: groupMembers.map((user: UserDocument) => user.toObject())
+		})
 	}
 
 	// Доделать по уму
@@ -82,45 +93,45 @@ export class GroupsController {
 		return this.groupsService.update(+id, updateGroupDto)
 	}
 
-	@ApiOperation({ summary: 'Удалить группу. Может только владелец группы' })
-	@ApiResponse({
-		status: HttpStatus.NO_CONTENT,
-		description: 'Группа успешно удалена'
-	})
-	@ApiResponse({
-		status: HttpStatus.NOT_FOUND,
-		description: 'Группа не найдена'
-	})
-	@HttpCode(HttpStatus.NO_CONTENT)
-	@Delete(':id')
-	remove(@Param('id') id: string, @Req() req: Request) {
-		return this.groupsService.remove(id, req['user'].id)
-	}
+	// @ApiOperation({ summary: 'Удалить группу. Может только владелец группы' })
+	// @ApiResponse({
+	// 	status: HttpStatus.NO_CONTENT,
+	// 	description: 'Группа успешно удалена'
+	// })
+	// @ApiResponse({
+	// 	status: HttpStatus.NOT_FOUND,
+	// 	description: 'Группа не найдена'
+	// })
+	// @HttpCode(HttpStatus.NO_CONTENT)
+	// @Delete(':id')
+	// remove(@Param('id') id: string, @Req() req: Request) {
+	// 	return this.groupsService.remove(id, req['user'].id)
+	// }
 
 	// по уму статус коды надо сделать
-	@ApiOperation({ summary: 'Вступить в группу' })
-	@ApiResponse({
-		status: HttpStatus.OK,
-		description: 'Успешное вступление/отправлена заявка'
-	})
-	@HttpCode(HttpStatus.OK)
-	@Post(':id/join')
-	joinGroup(@Param('id') groupId: string, @Req() req: Request) {
-		return this.groupsService.joinGroup(groupId, req['user'].id)
-	}
+	// @ApiOperation({ summary: 'Вступить в группу' })
+	// @ApiResponse({
+	// 	status: HttpStatus.OK,
+	// 	description: 'Успешное вступление/отправлена заявка'
+	// })
+	// @HttpCode(HttpStatus.OK)
+	// @Post(':id/join')
+	// joinGroup(@Param('id') groupId: string, @Req() req: Request) {
+	// 	return this.groupsService.joinGroup(groupId, req['user'].id)
+	// }
 
-	@ApiOperation({ summary: 'Вступить в группу' })
-	@ApiResponse({
-		status: HttpStatus.OK,
-		description: 'Успешное вступление/отправлена заявка'
-	})
-	@HttpCode(HttpStatus.OK)
-	@Post(':id/join/accept/:userId')
-	acceptRequest(
-		@Param('id') groupId: string,
-		@Param('userId') userId: string,
-		@Req() req: Request
-	) {
-		return this.groupsService.acceptRequest(groupId, userId, req['user'].id)
-	}
+	// @ApiOperation({ summary: 'Вступить в группу' })
+	// @ApiResponse({
+	// 	status: HttpStatus.OK,
+	// 	description: 'Успешное вступление/отправлена заявка'
+	// })
+	// @HttpCode(HttpStatus.OK)
+	// @Post(':id/join/accept/:userId')
+	// acceptRequest(
+	// 	@Param('id') groupId: string,
+	// 	@Param('userId') userId: string,
+	// 	@Req() req: Request
+	// ) {
+	// 	return this.groupsService.acceptRequest(groupId, userId, req['user'].id)
+	// }
 }

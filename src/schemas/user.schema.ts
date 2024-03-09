@@ -3,6 +3,7 @@ import { HydratedDocument } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { Role } from './role.schema'
+import { Group, GroupRolesEnum } from './group.schema'
 
 export type UserDocument = HydratedDocument<User>
 
@@ -21,14 +22,6 @@ export class User {
 	@Prop({ required: true })
 	password: string
 
-	// @ApiProperty({example: "Vladik", description: "Имя", required:false})
-	//     // @Prop()
-	//     // fist_name: string;
-	//     //
-	//     // @ApiProperty({example: "Sorokin", description: "Фамилия", required:false})
-	//     // @Prop()
-	//     // last_name: string;
-
 	@ApiProperty({
 		example: 'User',
 		description: 'Роли пользователя',
@@ -40,6 +33,31 @@ export class User {
 		autopopulate: true
 	})
 	roles: Role[]
+
+	@ApiProperty({
+		example: 'User',
+		description: 'Группа пользователя',
+		required: false
+	})
+	@Prop({
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Group',
+		default: null
+	})
+	group: Group
+
+	@ApiProperty({
+		example: 'user',
+		description: 'Роль пользователя в группе',
+		required: false
+	})
+	@ApiProperty({ example: 'member', description: 'Роль пользователя в группе' })
+	@Prop({
+		required: false,
+		enum: GroupRolesEnum,
+		default: null
+	})
+	groupRole: string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

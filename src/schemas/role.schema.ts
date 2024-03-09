@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose, { HydratedDocument } from 'mongoose'
 import { ApiProperty } from '@nestjs/swagger'
-import { Transform } from 'class-transformer'
 
 export type RoleDocument = HydratedDocument<Role>
 
@@ -15,7 +14,6 @@ export class Role {
 		example: '6597d87f09da1c01b87fe7d7',
 		description: 'Уникальный идентификатор'
 	})
-	@Transform(({ value }) => value.toString())
 	_id: mongoose.Schema.Types.ObjectId
 }
 

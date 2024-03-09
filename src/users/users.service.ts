@@ -6,7 +6,6 @@ import { Model } from 'mongoose'
 import { RolesService } from '../roles/roles.service'
 import { RoleDocument } from '../schemas/role.schema'
 import { GroupsService } from '../groups/groups.service'
-import { GroupDocument } from '../schemas/group.schema'
 import { NotificationsService } from '../notifications/notifications.service'
 import { NotificationDocument } from '../schemas/notification.schema'
 
@@ -48,17 +47,18 @@ export class UsersService {
 		return this.userModel.findById(id)
 	}
 
+	async getGroupMembers(groupId: string): Promise<UserDocument[]> {
+		return this.userModel.find({ group: groupId })
+	}
+
 	async getMe(request: Request) {
 		const userId = request['user'].id
 
 		const userData: UserDocument = await this.findUserById(userId)
-		const userGroup: GroupDocument =
-			await this.groupService.getGroupForUser(userId)
 		const userNotifications =
 			await this.notificationsService.findByUserId(userId)
 		return {
 			...userData.toObject(),
-			group: userGroup?.toObject(),
 			notifications: userNotifications.map(
 				(notification: NotificationDocument) => notification.toObject()
 			)
