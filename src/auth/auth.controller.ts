@@ -1,12 +1,4 @@
-import {
-	Body,
-	Controller,
-	HttpCode,
-	HttpStatus,
-	Post,
-	UsePipes,
-	ValidationPipe
-} from '@nestjs/common'
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { CreateUserDto } from '../users/dto/create-user.dto'
@@ -31,7 +23,6 @@ export class AuthController {
 		status: HttpStatus.CONFLICT,
 		description: 'Пользователь с таким email-ом уже зарегестрирован'
 	})
-	@UsePipes(new ValidationPipe())
 	@Public()
 	@Post('/registration')
 	async registration(@Body() dto: CreateUserDto) {
@@ -48,7 +39,6 @@ export class AuthController {
 		description: 'Указаны некорректные данные'
 	})
 	@HttpCode(200)
-	@UsePipes(new ValidationPipe())
 	@Public()
 	@Post('/login')
 	async login(@Body() dto: LoginUserDto) {

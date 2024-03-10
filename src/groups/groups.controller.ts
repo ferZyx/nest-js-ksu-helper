@@ -10,9 +10,7 @@ import {
 	Patch,
 	Post,
 	Req,
-	UseInterceptors,
-	UsePipes,
-	ValidationPipe
+	UseInterceptors
 } from '@nestjs/common'
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/create-group.dto'
@@ -45,7 +43,6 @@ export class GroupsController {
 	})
 	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
-	@UsePipes(new ValidationPipe())
 	@Post()
 	async create(
 		@Body() createGroupDto: CreateGroupDto,
