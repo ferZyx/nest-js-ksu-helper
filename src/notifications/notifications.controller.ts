@@ -15,7 +15,12 @@ import { NotificationsService } from './notifications.service'
 import { CreateNotificationDto } from './dto/create-notification.dto'
 import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { Roles } from '../auth/roles-auth.decorator'
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiResponse,
+	ApiTags
+} from '@nestjs/swagger'
 import { NotificationEntity } from './entities/notification.entity'
 import { NotificationDocument } from '../schemas/notification.schema'
 import { ParseObjectIdPipe } from '../pipes/parse-object-id.pipe'
@@ -26,6 +31,7 @@ export class NotificationsController {
 	constructor(private readonly notificationsService: NotificationsService) {}
 
 	@ApiOperation({ summary: 'Создать уведомление. Доступно админам' })
+	@ApiBearerAuth()
 	@Roles('Admin')
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Post()
@@ -38,6 +44,7 @@ export class NotificationsController {
 	}
 
 	@ApiOperation({ summary: 'Получить все уведомления. Доступно админам' })
+	@ApiBearerAuth()
 	@Roles('Admin')
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get()
@@ -49,6 +56,7 @@ export class NotificationsController {
 	}
 
 	@ApiOperation({ summary: 'Получить уведомление по id. Доступно админам' })
+	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
 	@Get(':id')
@@ -61,6 +69,7 @@ export class NotificationsController {
 	}
 
 	@ApiOperation({ summary: 'Обновить уведомление по id' })
+	@ApiBearerAuth()
 	@Patch(':id')
 	update(
 		@Param('id', ParseObjectIdPipe) id: string,
@@ -70,6 +79,7 @@ export class NotificationsController {
 	}
 
 	@ApiOperation({ summary: 'Удалить уведомление по id. Доступно админам' })
+	@ApiBearerAuth()
 	@Roles('Admin')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@ApiResponse({

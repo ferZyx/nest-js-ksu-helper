@@ -10,7 +10,12 @@ import {
 } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { CreateRoleDto } from './dto/create-role.dto'
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiResponse,
+	ApiTags
+} from '@nestjs/swagger'
 import { Role } from '../schemas/role.schema'
 import { Roles } from '../auth/roles-auth.decorator'
 
@@ -29,6 +34,7 @@ export class RolesController {
 		status: HttpStatus.CONFLICT,
 		description: 'Роль уже существует'
 	})
+	@ApiBearerAuth()
 	@Roles('Admin')
 	@Post()
 	async createRole(@Body() dto: CreateRoleDto) {
@@ -44,6 +50,7 @@ export class RolesController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Роль не найдена'
 	})
+	@ApiBearerAuth()
 	@Roles('Admin')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@Delete()
@@ -61,6 +68,7 @@ export class RolesController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Роль не найдена'
 	})
+	@ApiBearerAuth()
 	@Roles('Admin')
 	@Get('/:name')
 	async getRoleByName(@Param('name') name: string) {

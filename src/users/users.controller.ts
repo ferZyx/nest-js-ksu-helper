@@ -6,7 +6,12 @@ import {
 	Req,
 	UseInterceptors
 } from '@nestjs/common'
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiResponse,
+	ApiTags
+} from '@nestjs/swagger'
 import { User, UserDocument } from '../schemas/user.schema'
 import { UsersService } from './users.service'
 import { UserEntity } from './entities/user.entity'
@@ -23,6 +28,7 @@ export class UsersController {
 		status: HttpStatus.OK,
 		description: 'Успешное получение всех пользователей'
 	})
+	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
 	@Get()
@@ -37,6 +43,7 @@ export class UsersController {
 		status: HttpStatus.OK,
 		description: 'Успешное получение о себе'
 	})
+	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get('me')
 	async getMe(@Req() request: Request): Promise<UserEntity> {

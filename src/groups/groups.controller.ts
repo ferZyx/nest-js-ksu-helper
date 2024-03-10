@@ -17,7 +17,12 @@ import {
 import { GroupsService } from './groups.service'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiResponse,
+	ApiTags
+} from '@nestjs/swagger'
 import { Roles } from '../auth/roles-auth.decorator'
 import { Group, GroupDocument } from '../schemas/group.schema'
 import { GroupEntity } from './entities/group.entity'
@@ -38,6 +43,7 @@ export class GroupsController {
 		description: 'Успешное создание группы',
 		type: Group
 	})
+	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
 	@UsePipes(new ValidationPipe())
 	@Post()
@@ -57,6 +63,7 @@ export class GroupsController {
 		summary: '[!need fix!] Получить все группы. Доступно админам'
 	})
 	@ApiResponse({ type: [Group], status: HttpStatus.OK })
+	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Roles('Admin')
 	@Get()
@@ -77,6 +84,7 @@ export class GroupsController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Группа не найдена'
 	})
+	@ApiBearerAuth()
 	@UseInterceptors(ClassSerializerInterceptor)
 	@Get(':id')
 	async findOne(@Param('id') id: string): Promise<GroupEntity> {
@@ -90,6 +98,7 @@ export class GroupsController {
 	}
 
 	// Доделать по уму
+	@ApiBearerAuth()
 	@Patch(':id')
 	update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
 		return this.groupsService.update(+id, updateGroupDto)
@@ -107,6 +116,7 @@ export class GroupsController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Группа не найдена'
 	})
+	@ApiBearerAuth()
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@Delete(':id')
 	remove(@Param('id') groupId: string, @Req() req: Request) {
