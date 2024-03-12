@@ -7,7 +7,6 @@ import { RolesService } from '../roles/roles.service'
 import { RoleDocument } from '../schemas/role.schema'
 import { GroupsService } from '../groups/groups.service'
 import { NotificationsService } from '../notifications/notifications.service'
-import { NotificationDocument } from '../schemas/notification.schema'
 
 @Injectable()
 export class UsersService {
@@ -20,7 +19,7 @@ export class UsersService {
 	) {}
 
 	getAll(): Promise<UserDocument[]> {
-		return this.userModel.find().exec()
+		return this.userModel.find()
 	}
 
 	async createUser(dto: CreateUserDto): Promise<UserDocument> {
@@ -40,28 +39,27 @@ export class UsersService {
 	}
 
 	async findUserByEmail(email: string): Promise<UserDocument> {
-		return this.userModel.findOne({ email })
+		const user = await this.userModel.findOne({ email })
+		return user.toObject()
 	}
 
 	async findUserById(id: string): Promise<UserDocument> {
 		return this.userModel.findById(id)
 	}
 
-	async getGroupMembers(groupId: string): Promise<UserDocument[]> {
+	async findUsersByGroupId(groupId: string): Promise<UserDocument[]> {
 		return this.userModel.find({ group: groupId })
 	}
 
 	async getMe(request: Request) {
 		const userId = request['user'].id
 
-		const userData: UserDocument = await this.findUserById(userId)
-		const userNotifications =
-			await this.notificationsService.findByUserId(userId)
-		return {
-			...userData.toObject(),
-			notifications: userNotifications.map(
-				(notification: NotificationDocument) => notification.toObject()
-			)
-		}
+		const user: UserDocument = await this.findUserById(userId)
+		user.notifications = await this.notificationsService.findByUserId(userId)
+		return user
+	}
+
+	async remove(id: string) {
+		return this.userModel.findByIdAndDelete(id).exec()
 	}
 }

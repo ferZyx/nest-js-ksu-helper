@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
-import mongoose from 'mongoose'
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator'
+import { GroupTypeEnum } from '../../schemas/group.schema'
 
 export class CreateGroupDto {
 	@IsString({ message: 'Должно быть строкой' })
@@ -8,8 +8,8 @@ export class CreateGroupDto {
 
 	@IsString({ message: 'Должно быть строкой' })
 	@IsNotEmpty({ message: 'Не должно быть пустым' })
-	readonly type: string
-
-	@IsOptional()
-	joinRequests?: mongoose.Schema.Types.ObjectId[]
+	@IsEnum(GroupTypeEnum, {
+		message: 'Type должно быть одним из: public, requests, private'
+	})
+	readonly type: GroupTypeEnum
 }

@@ -1,6 +1,5 @@
 import {
 	Body,
-	ClassSerializerInterceptor,
 	Controller,
 	Delete,
 	Get,
@@ -8,8 +7,7 @@ import {
 	HttpStatus,
 	Param,
 	Patch,
-	Post,
-	UseInterceptors
+	Post
 } from '@nestjs/common'
 import { NotificationsService } from './notifications.service'
 import { CreateNotificationDto } from './dto/create-notification.dto'
@@ -24,40 +22,39 @@ import {
 import { NotificationEntity } from './entities/notification.entity'
 import { NotificationDocument } from '../schemas/notification.schema'
 import { ParseObjectIdPipe } from '../pipes/parse-object-id.pipe'
+import { TransformResponse } from '../interceptros/custom-class-serializer.interceptor'
 
 @ApiTags('Уведомления')
+@ApiBearerAuth()
 @Controller('notifications')
 export class NotificationsController {
 	constructor(private readonly notificationsService: NotificationsService) {}
 
 	@ApiOperation({ summary: 'Создать уведомление. Доступно админам' })
-	@ApiBearerAuth()
 	@Roles('Admin')
-	@UseInterceptors(ClassSerializerInterceptor)
+	@TransformResponse(NotificationEntity)
 	@Post()
 	async create(
 		@Body() createNotificationDto: CreateNotificationDto
-	): Promise<NotificationEntity> {
-		const notification: NotificationDocument =
-			await this.notificationsService.create(createNotificationDto)
-		return new NotificationEntity(notification.toObject())
+	): Promise<NotificationDocument> {
+		return this.notificationsService.create(createNotificationDto)
 	}
 
 	@ApiOperation({ summary: 'Получить все уведомления. Доступно админам' })
-	@ApiBearerAuth()
 	@Roles('Admin')
-	@UseInterceptors(ClassSerializerInterceptor)
+	@TransformResponse(NotificationEntity)
 	@Get()
-	async findAll(): Promise<NotificationEntity[]> {
-		const notifications = await this.notificationsService.findAll()
-		return notifications.map(
-			(notification) => new NotificationEntity(notification.toObject())
-		)
+	async findAll(): Promise<NotificationDocument[]> {
+		const notifications: NotificationDocument[] =
+			await this.notificationsService.findAll()
+		return notifications
+		// return notifications.map(
+		// 	(notification) => new NotificationEntity(notification.toObject())
+		// )
 	}
 
 	@ApiOperation({ summary: 'Получить уведомление по id. Доступно админам' })
-	@ApiBearerAuth()
-	@UseInterceptors(ClassSerializerInterceptor)
+	@TransformResponse(NotificationEntity)
 	@Roles('Admin')
 	@Get(':id')
 	async findOne(
@@ -65,11 +62,10 @@ export class NotificationsController {
 	): Promise<NotificationEntity> {
 		const notification: NotificationDocument =
 			await this.notificationsService.findOne(id)
-		return new NotificationEntity(notification.toObject())
+		return new NotificationEntity(notification)
 	}
 
 	@ApiOperation({ summary: 'Обновить уведомление по id' })
-	@ApiBearerAuth()
 	@Patch(':id')
 	update(
 		@Param('id', ParseObjectIdPipe) id: string,
@@ -79,7 +75,6 @@ export class NotificationsController {
 	}
 
 	@ApiOperation({ summary: 'Удалить уведомление по id. Доступно админам' })
-	@ApiBearerAuth()
 	@Roles('Admin')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@ApiResponse({

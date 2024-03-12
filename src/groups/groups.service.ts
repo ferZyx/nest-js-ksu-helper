@@ -14,9 +14,10 @@ import {
 	GroupRolesEnum,
 	GroupTypeEnum
 } from '../schemas/group.schema'
-import mongoose, { Model } from 'mongoose'
+import { Model } from 'mongoose'
 import { UsersService } from 'src/users/users.service'
 import { NotificationsService } from '../notifications/notifications.service'
+import { UserDocument } from '../schemas/user.schema'
 
 @Injectable()
 export class GroupsService {
@@ -28,10 +29,11 @@ export class GroupsService {
 	) {}
 
 	async create(createGroupDto: CreateGroupDto, req: Request) {
-		if (GroupTypeEnum[createGroupDto.type] === undefined) {
+		if (!(createGroupDto.type in GroupTypeEnum)) {
 			throw new HttpException('Invalid group type', HttpStatus.BAD_REQUEST)
 		}
-		const user = req['user']
+		const userId = req['user'].id
+		const user: UserDocument = await this.usersService.findUserById(userId)
 		if (user.group) {
 			throw new HttpException(
 				'User already has a group',
@@ -39,23 +41,28 @@ export class GroupsService {
 			)
 		}
 		const createdGroup = await this.groupModel.create(createGroupDto)
-		const userDocument = await this.usersService.findUserById(user.id)
-		userDocument.group = createdGroup
-		userDocument.groupRole = GroupRolesEnum.owner
-		await userDocument.save()
+		user.group = createdGroup
+		user.groupRole = GroupRolesEnum.owner
+		await user.save()
 
 		return createdGroup
 	}
 
-	async findAll(): Promise<GroupDocument[]> {
-		return this.groupModel.find().exec()
+	async findAll(): Promise<Group[]> {
+		const groups: GroupDocument[] = await this.groupModel.find().exec()
+		return await Promise.all(
+			groups.map(async (group: GroupDocument) => {
+				const members: UserDocument[] =
+					await this.usersService.findUsersByGroupId(group.id)
+				return {
+					...group.toObject(),
+					members: members.map((member: UserDocument) => member.toObject())
+				}
+			})
+		)
 	}
 
 	async findOne(id: string) {
-		const isIdValid = mongoose.Types.ObjectId.isValid(id)
-		if (!isIdValid) {
-			throw new HttpException('Invalid id', HttpStatus.BAD_REQUEST)
-		}
 		const group = await this.groupModel.findById(id).exec()
 		if (!group) {
 			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
@@ -72,7 +79,15 @@ export class GroupsService {
 		if (!group) {
 			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
 		}
-		const user = await this.usersService.findUserById(userId)
+		const groupMembers: UserDocument[] =
+			await this.usersService.findUsersByGroupId(groupId)
+		if (groupMembers.length > 1) {
+			throw new HttpException(
+				'Group has members. Remove them first',
+				HttpStatus.BAD_REQUEST
+			)
+		}
+		const user: UserDocument = await this.usersService.findUserById(userId)
 		if (
 			String(user.group) !== groupId ||
 			user.groupRole !== GroupRolesEnum.owner
@@ -82,6 +97,9 @@ export class GroupsService {
 				HttpStatus.FORBIDDEN
 			)
 		}
+		user.group = null
+		user.groupRole = null
+		await user.save()
 		return this.groupModel.findByIdAndDelete(groupId).exec()
 	}
 

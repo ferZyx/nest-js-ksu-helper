@@ -4,6 +4,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { Role } from './role.schema'
 import { Group, GroupRolesEnum } from './group.schema'
+import { NotificationDocument } from './notification.schema'
 
 export type UserDocument = HydratedDocument<User>
 
@@ -58,6 +59,12 @@ export class User {
 		default: null
 	})
 	groupRole: string
+
+	@Prop({
+		required: false,
+		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification' }]
+	})
+	notifications: NotificationDocument[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

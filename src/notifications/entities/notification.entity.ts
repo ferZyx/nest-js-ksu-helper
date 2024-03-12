@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import { Exclude, Transform } from 'class-transformer'
+import { Exclude } from 'class-transformer'
 import { ApiProperty } from '@nestjs/swagger'
 
 export class NotificationEntity {
@@ -7,7 +7,6 @@ export class NotificationEntity {
 		example: '6597d87f09da1c01b87fe7d7',
 		description: 'Уникальный идентификатор уведомления'
 	})
-	@Transform(({ value }) => value.toString())
 	_id: Types.ObjectId
 
 	@ApiProperty({ example: 'Новое уведомление', description: 'Заголовок' })
@@ -16,7 +15,6 @@ export class NotificationEntity {
 	@ApiProperty({ example: 'Текст уведомления', description: 'Сообщение' })
 	readonly message: string
 
-	@Transform(({ value }) => value.toString())
 	readonly user: Types.ObjectId[]
 
 	readonly hasRead: boolean

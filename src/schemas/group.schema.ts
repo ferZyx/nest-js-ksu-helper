@@ -6,9 +6,9 @@ import { ApiProperty } from '@nestjs/swagger'
 export type GroupDocument = HydratedDocument<Group>
 
 export enum GroupTypeEnum {
-	'public',
-	'requests',
-	'private'
+	'public' = 'public',
+	'requests' = 'requests',
+	'private' = 'private'
 }
 
 export enum GroupRolesEnum {

@@ -15,7 +15,9 @@ export class NotificationsService {
 		private readonly notificationModel: Model<NotificationDocument>
 	) {}
 
-	create(createNotificationDto: CreateNotificationDto) {
+	async create(
+		createNotificationDto: CreateNotificationDto
+	): Promise<NotificationDocument> {
 		return this.notificationModel.create(createNotificationDto)
 	}
 
@@ -30,12 +32,15 @@ export class NotificationsService {
 		})
 	}
 
-	findAll() {
-		return this.notificationModel.find().exec()
+	findAll(): Promise<NotificationDocument[]> {
+		return this.notificationModel.find()
 	}
 
 	async findOne(id: string): Promise<NotificationDocument> {
-		const notification = await this.notificationModel.findById(id).exec()
+		console.log('id', id)
+		const notification: NotificationDocument =
+			await this.notificationModel.findById(id)
+		console.log(notification)
 		if (!notification) {
 			throw new NotFoundException('Notification not found')
 		}

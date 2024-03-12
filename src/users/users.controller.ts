@@ -1,11 +1,4 @@
-import {
-	ClassSerializerInterceptor,
-	Controller,
-	Get,
-	HttpStatus,
-	Req,
-	UseInterceptors
-} from '@nestjs/common'
+import { Controller, Get, HttpStatus, Req } from '@nestjs/common'
 import {
 	ApiBearerAuth,
 	ApiOperation,
@@ -16,6 +9,7 @@ import { User, UserDocument } from '../schemas/user.schema'
 import { UsersService } from './users.service'
 import { UserEntity } from './entities/user.entity'
 import { Roles } from '../auth/roles-auth.decorator'
+import { TransformResponse } from '../interceptros/custom-class-serializer.interceptor'
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -24,17 +18,16 @@ export class UsersController {
 
 	@ApiOperation({ summary: 'Получить всех пользователей. Доступно админам' })
 	@ApiResponse({
-		type: [User],
+		type: User,
 		status: HttpStatus.OK,
 		description: 'Успешное получение всех пользователей'
 	})
 	@ApiBearerAuth()
-	@UseInterceptors(ClassSerializerInterceptor)
+	@TransformResponse(UserEntity)
 	@Roles('Admin')
 	@Get()
-	async getAll(): Promise<UserEntity[]> {
-		const users: UserDocument[] = await this.usersService.getAll()
-		return users.map((user: UserDocument) => new UserEntity(user.toObject()))
+	async getAll(): Promise<UserDocument[]> {
+		return await this.usersService.getAll()
 	}
 
 	@ApiOperation({ summary: 'Получить инфу о себе.' })
@@ -44,10 +37,22 @@ export class UsersController {
 		description: 'Успешное получение о себе'
 	})
 	@ApiBearerAuth()
-	@UseInterceptors(ClassSerializerInterceptor)
+	@TransformResponse(UserEntity)
 	@Get('me')
-	async getMe(@Req() request: Request): Promise<UserEntity> {
-		const userData = await this.usersService.getMe(request)
-		return new UserEntity(userData)
+	async getMe(@Req() request: Request): Promise<User> {
+		return await this.usersService.getMe(request)
 	}
+	// @ApiOperation({ summary: 'Удалить пользователя. Доступно админам' })
+	// @ApiResponse({
+	// 	type: User,
+	// 	status: HttpStatus.OK,
+	// 	description: 'Успешное удаление пользователя'
+	// })
+	// @ApiBearerAuth()
+	// @Roles('Admin')
+	// @Delete(':id')
+	// async remove(@Param('id') id: string): Promise<UserEntity> {
+	// 	const user = await this.usersService.remove(id)
+	// 	return new UserEntity(user.toObject())
+	// }
 }
