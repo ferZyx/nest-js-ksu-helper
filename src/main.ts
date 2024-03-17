@@ -8,6 +8,25 @@ import { ValidationPipe } from '@nestjs/common'
 async function bootstrap() {
 	const PORT = process.env.PORT || 5000
 	const app = await NestFactory.create(AppModule)
+
+	if (process.env.NEST_DEBUG === 'true') {
+		const config = new DocumentBuilder()
+			.setTitle('Апишечка от бога')
+			.setDescription('Владик смог запусить сваггер')
+			.setVersion('1.0.0')
+			.addBearerAuth()
+			.build()
+		const document = SwaggerModule.createDocument(app, config)
+		SwaggerModule.setup('/api/docs', app, document, {
+			customSiteTitle: 'Tolyan API Docs',
+			swaggerOptions: {
+				docExpansion: 'none'
+			}
+		})
+	}
+
+	app.setGlobalPrefix('api')
+	app.use(cookieParser())
 	app.enableCors({
 		credentials: true,
 		origin: [
@@ -16,25 +35,12 @@ async function bootstrap() {
 			'http://localhost:3000'
 		]
 	})
-	app.use(cookieParser())
-	app.setGlobalPrefix('api')
 
 	app.useGlobalPipes(
 		new ValidationPipe({
 			whitelist: true
 		})
 	)
-
-	const config = new DocumentBuilder()
-		.setTitle('Апишечка от бога')
-		.setDescription('Владик смог запусить сваггер')
-		.setVersion('1.0.0')
-		.addBearerAuth()
-		.build()
-	const document = SwaggerModule.createDocument(app, config)
-	SwaggerModule.setup('/api/docs', app, document, {
-		customSiteTitle: 'Tolyan API Docs'
-	})
 
 	await app
 		.listen(PORT)

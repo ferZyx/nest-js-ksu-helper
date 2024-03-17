@@ -7,7 +7,8 @@ import {
 	HttpStatus,
 	Param,
 	Patch,
-	Post
+	Post,
+	Req
 } from '@nestjs/common'
 import { NotificationsService } from './notifications.service'
 import { CreateNotificationDto } from './dto/create-notification.dto'
@@ -47,6 +48,7 @@ export class NotificationsController {
 	async findAll(): Promise<NotificationDocument[]> {
 		return await this.notificationsService.findAll()
 	}
+
 	@ApiOperation({ summary: 'Получить уведомление по id. Доступно админам' })
 	@UseMongooseInterceptor(NotificationEntity)
 	@Roles('Admin')
@@ -65,8 +67,7 @@ export class NotificationsController {
 		return this.notificationsService.update(id, updateNotificationDto)
 	}
 
-	@ApiOperation({ summary: 'Удалить уведомление по id. Доступно админам' })
-	@Roles('Admin')
+	@ApiOperation({ summary: 'Удалить уведомление по id' })
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@ApiResponse({
 		status: HttpStatus.NO_CONTENT,
@@ -74,8 +75,10 @@ export class NotificationsController {
 	})
 	@Delete(':id')
 	remove(
-		@Param('id', ParseObjectIdPipe) id: string
+		@Param('id', ParseObjectIdPipe) id: string,
+		@Req() req: Request & { user: { id: string } }
 	): Promise<NotificationDocument> {
-		return this.notificationsService.remove(id)
+		const userId = req.user.id
+		return this.notificationsService.remove(id, userId)
 	}
 }

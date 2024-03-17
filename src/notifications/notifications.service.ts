@@ -77,10 +77,26 @@ export class NotificationsService {
 		return notification
 	}
 
-	async remove(id: string): Promise<NotificationDocument> {
-		const deletedNotification = await this.notificationModel
-			.findByIdAndDelete(id)
-			.exec()
+	async remove(id: string, userId: string): Promise<NotificationDocument> {
+		const user: UserDocument = await this.usersService.findUserById(userId)
+		if (!user) {
+			throw new NotFoundException('User not found')
+		}
+		const userHaveNotification = user.notifications.some(
+			(notification: NotificationDocument) =>
+				notification._id.toString() === id.toString()
+		)
+		if (!userHaveNotification) {
+			throw new NotFoundException('Notification not found')
+		}
+		user.notifications = user.notifications.filter(
+			(notification: NotificationDocument) =>
+				notification._id.toString() !== id.toString()
+		)
+		await user.save()
+
+		const deletedNotification: NotificationDocument =
+			await this.notificationModel.findByIdAndDelete(id).exec()
 		if (!deletedNotification) {
 			throw new NotFoundException('Notification not found')
 		}
