@@ -1,12 +1,11 @@
 import * as mongoose from 'mongoose'
-import { HydratedDocument } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { Role } from './role.schema'
 import { Group, GroupRolesEnum } from './group.schema'
 import { NotificationDocument } from './notification.schema'
 
-export type UserDocument = HydratedDocument<User>
+export type UserDocument = mongoose.Document & User
 
 @Schema({ timestamps: true })
 export class User {
@@ -62,7 +61,10 @@ export class User {
 
 	@Prop({
 		required: false,
-		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification' }]
+		type: [
+			{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification', default: [] }
+		],
+		autopopulate: true
 	})
 	notifications: NotificationDocument[]
 }

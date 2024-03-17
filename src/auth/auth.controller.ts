@@ -25,7 +25,7 @@ export class AuthController {
 	})
 	@Public()
 	@Post('/registration')
-	async registration(@Body() dto: CreateUserDto) {
+	async registration(@Body() dto: CreateUserDto): Promise<{ token: string }> {
 		return await this.authService.registration(dto)
 	}
 

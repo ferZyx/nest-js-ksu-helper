@@ -9,7 +9,6 @@ import {
 import { ClassTransformOptions, plainToInstance } from 'class-transformer'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { ApiResponse } from '@nestjs/swagger'
 import { HydratedDocument } from 'mongoose'
 
 @Injectable()
@@ -24,21 +23,17 @@ export class TransformInterceptor implements NestInterceptor {
 			map((data) => {
 				let obj: HydratedDocument<any> = data
 				if (data?.length) {
+					obj = data.map((item) => {
+						if (item?.toJSON) {
+							return item.toJSON()
+						}
+						return item
+					})
 					return plainToInstance(
 						this.entityClass,
-						obj.map((item) => item.toJSON()),
+						obj,
 						this.classTransformOptions
 					)
-					// obj.map((item) => {
-					// 	if (item?.toJSON) {
-					// 		console.log('toJSON')
-					// 		return item
-					// 	}
-					// 	if (item?.lean) {
-					// 		console.log('lean')
-					// 		return item.lean()
-					// 	}
-					// })
 				} else {
 					if (data?.toJSON) {
 						console.log('toJSON single')
@@ -66,7 +61,6 @@ export function TransformResponse(
 	return applyDecorators(
 		UseInterceptors(
 			new TransformInterceptor(entityClass, classTransformOptions)
-		),
-		ApiResponse({ status: 200, type: entityClass })
+		)
 	)
 }

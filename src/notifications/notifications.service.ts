@@ -1,46 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { CreateNotificationDto } from './dto/create-notification.dto'
+import {
+	forwardRef,
+	Inject,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
 import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import {
 	Notification,
 	NotificationDocument
 } from '../schemas/notification.schema'
+import { CreateNotificationDto } from './dto/create-notification.dto'
+import { UsersService } from '../users/users.service'
+import { UserDocument } from '../schemas/user.schema'
 
 @Injectable()
 export class NotificationsService {
 	constructor(
 		@InjectModel(Notification.name)
-		private readonly notificationModel: Model<NotificationDocument>
+		private readonly notificationModel: Model<NotificationDocument>,
+		@Inject(forwardRef(() => UsersService))
+		private readonly usersService: UsersService
 	) {}
 
-	async create(
-		createNotificationDto: CreateNotificationDto
-	): Promise<NotificationDocument> {
-		return this.notificationModel.create(createNotificationDto)
+	async create({
+		userId,
+		title,
+		message
+	}: CreateNotificationDto): Promise<NotificationDocument> {
+		const isValid = mongoose.Types.ObjectId.isValid(userId)
+		if (!isValid) {
+			throw new NotFoundException('User not found')
+		}
+		const user: UserDocument = await this.usersService.findUserById(userId)
+		if (!user) {
+			throw new NotFoundException('User not found')
+		}
+		const notification: NotificationDocument =
+			await this.notificationModel.create({ title, message })
+		await this.usersService.addNotificationToUser(user._id, notification._id)
+		return notification
 	}
 
-	createRequestAcceptedNotification(
-		userId: string,
-		groupId: string
-	): Promise<NotificationDocument> {
-		return this.notificationModel.create({
-			title: 'Request Accepted',
-			message: `Your request to join group ${groupId} has been accepted`,
-			user: userId
-		})
-	}
+	// createRequestAcceptedNotification(
+	// 	userId: string,
+	// 	groupId: string
+	// ): Promise<NotificationDocument> {
+	// 	return this.notificationModel.create({
+	// 		title: 'Request Accepted',
+	// 		message: `Your request to join group ${groupId} has been accepted`,
+	// 		user: userId
+	// 	})
+	// }
 
 	findAll(): Promise<NotificationDocument[]> {
-		return this.notificationModel.find()
+		return this.notificationModel.find().exec()
 	}
 
 	async findOne(id: string): Promise<NotificationDocument> {
-		console.log('id', id)
 		const notification: NotificationDocument =
 			await this.notificationModel.findById(id)
-		console.log(notification)
 		if (!notification) {
 			throw new NotFoundException('Notification not found')
 		}
@@ -65,9 +85,5 @@ export class NotificationsService {
 			throw new NotFoundException('Notification not found')
 		}
 		return
-	}
-
-	findByUserId(userId: string): Promise<NotificationDocument[]> {
-		return this.notificationModel.find({ user: userId }).exec()
 	}
 }

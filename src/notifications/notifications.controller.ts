@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common'
 import { NotificationsService } from './notifications.service'
 import { CreateNotificationDto } from './dto/create-notification.dto'
-import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { Roles } from '../auth/roles-auth.decorator'
 import {
 	ApiBearerAuth,
@@ -21,8 +20,9 @@ import {
 } from '@nestjs/swagger'
 import { NotificationEntity } from './entities/notification.entity'
 import { NotificationDocument } from '../schemas/notification.schema'
-import { ParseObjectIdPipe } from '../pipes/parse-object-id.pipe'
-import { TransformResponse } from '../interceptros/custom-class-serializer.interceptor'
+import { ParseObjectIdPipe } from '../utils/pipes/parse-object-id.pipe'
+import { UpdateNotificationDto } from './dto/update-notification.dto'
+import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-serializer.interceptor'
 
 @ApiTags('Уведомления')
 @ApiBearerAuth()
@@ -32,7 +32,7 @@ export class NotificationsController {
 
 	@ApiOperation({ summary: 'Создать уведомление. Доступно админам' })
 	@Roles('Admin')
-	@TransformResponse(NotificationEntity)
+	@UseMongooseInterceptor(NotificationEntity)
 	@Post()
 	async create(
 		@Body() createNotificationDto: CreateNotificationDto
@@ -42,35 +42,26 @@ export class NotificationsController {
 
 	@ApiOperation({ summary: 'Получить все уведомления. Доступно админам' })
 	@Roles('Admin')
-	@TransformResponse(NotificationEntity)
+	@UseMongooseInterceptor(NotificationEntity)
 	@Get()
 	async findAll(): Promise<NotificationDocument[]> {
-		const notifications: NotificationDocument[] =
-			await this.notificationsService.findAll()
-		return notifications
-		// return notifications.map(
-		// 	(notification) => new NotificationEntity(notification.toObject())
-		// )
+		return await this.notificationsService.findAll()
 	}
-
 	@ApiOperation({ summary: 'Получить уведомление по id. Доступно админам' })
-	@TransformResponse(NotificationEntity)
+	@UseMongooseInterceptor(NotificationEntity)
 	@Roles('Admin')
 	@Get(':id')
-	async findOne(
-		@Param('id', ParseObjectIdPipe) id: string
-	): Promise<NotificationEntity> {
-		const notification: NotificationDocument =
-			await this.notificationsService.findOne(id)
-		return new NotificationEntity(notification)
+	async findOne(@Param('id', ParseObjectIdPipe) id: string) {
+		return this.notificationsService.findOne(id)
 	}
 
 	@ApiOperation({ summary: 'Обновить уведомление по id' })
+	@UseMongooseInterceptor(NotificationEntity)
 	@Patch(':id')
 	update(
 		@Param('id', ParseObjectIdPipe) id: string,
 		@Body() updateNotificationDto: UpdateNotificationDto
-	) {
+	): Promise<NotificationDocument> {
 		return this.notificationsService.update(id, updateNotificationDto)
 	}
 
@@ -82,7 +73,9 @@ export class NotificationsController {
 		description: 'Успешно удалено'
 	})
 	@Delete(':id')
-	remove(@Param('id', ParseObjectIdPipe) id: string) {
+	remove(
+		@Param('id', ParseObjectIdPipe) id: string
+	): Promise<NotificationDocument> {
 		return this.notificationsService.remove(id)
 	}
 }

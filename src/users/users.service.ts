@@ -38,9 +38,20 @@ export class UsersService {
 		})
 	}
 
+	async addNotificationToUser(
+		userId: string,
+		notificationId: string
+	): Promise<UserDocument> {
+		return this.userModel
+			.findOneAndUpdate(
+				{ _id: userId },
+				{ $push: { notifications: notificationId } }
+			)
+			.exec()
+	}
+
 	async findUserByEmail(email: string): Promise<UserDocument> {
-		const user = await this.userModel.findOne({ email })
-		return user.toObject()
+		return this.userModel.findOne({ email })
 	}
 
 	async findUserById(id: string): Promise<UserDocument> {
@@ -55,7 +66,6 @@ export class UsersService {
 		const userId = request['user'].id
 
 		const user: UserDocument = await this.findUserById(userId)
-		user.notifications = await this.notificationsService.findByUserId(userId)
 		return user
 	}
 

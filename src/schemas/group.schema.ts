@@ -1,9 +1,9 @@
-import mongoose, { HydratedDocument } from 'mongoose'
+import mongoose from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { User } from './user.schema'
+import { User, UserDocument } from './user.schema'
 import { ApiProperty } from '@nestjs/swagger'
 
-export type GroupDocument = HydratedDocument<Group>
+export type GroupDocument = Group & mongoose.Document
 
 export enum GroupTypeEnum {
 	'public' = 'public',
@@ -17,7 +17,7 @@ export enum GroupRolesEnum {
 	'owner' = 'owner'
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toJSON: { virtuals: true, getters: true } })
 export class Group {
 	@ApiProperty({ example: 'Group name', description: 'Название группы' })
 	@Prop({ required: true })
@@ -42,6 +42,15 @@ export class Group {
 	@ApiProperty({ example: 'public', description: 'Тип группы' })
 	@Prop({ required: true, enum: GroupTypeEnum })
 	type: string
-}
 
-export const GroupSchema = SchemaFactory.createForClass(Group)
+	members: UserDocument[]
+}
+const GroupSchema = SchemaFactory.createForClass(Group)
+
+GroupSchema.virtual('members', {
+	ref: 'User',
+	localField: '_id',
+	foreignField: 'group'
+})
+
+export { GroupSchema }

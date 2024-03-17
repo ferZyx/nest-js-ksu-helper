@@ -16,10 +16,13 @@ import {
 	ApiResponse,
 	ApiTags
 } from '@nestjs/swagger'
-import { Role } from '../schemas/role.schema'
+import { Role, RoleDocument } from '../schemas/role.schema'
 import { Roles } from '../auth/roles-auth.decorator'
+import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-serializer.interceptor'
+import { RoleEntity } from './entities/role.entity'
 
 @ApiTags('Роли пользователей')
+@ApiBearerAuth()
 @Controller('roles')
 export class RolesController {
 	constructor(private readonly rolesService: RolesService) {}
@@ -34,10 +37,10 @@ export class RolesController {
 		status: HttpStatus.CONFLICT,
 		description: 'Роль уже существует'
 	})
-	@ApiBearerAuth()
+	@UseMongooseInterceptor(RoleEntity)
 	@Roles('Admin')
 	@Post()
-	async createRole(@Body() dto: CreateRoleDto) {
+	async createRole(@Body() dto: CreateRoleDto): Promise<RoleDocument> {
 		return this.rolesService.createRole(dto)
 	}
 
@@ -50,7 +53,7 @@ export class RolesController {
 		status: HttpStatus.NOT_FOUND,
 		description: 'Роль не найдена'
 	})
-	@ApiBearerAuth()
+	@UseMongooseInterceptor(RoleEntity)
 	@Roles('Admin')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@Delete()
@@ -64,11 +67,11 @@ export class RolesController {
 		description: 'Роль найдена',
 		type: Role
 	})
+	@UseMongooseInterceptor(RoleEntity)
 	@ApiResponse({
 		status: HttpStatus.NOT_FOUND,
 		description: 'Роль не найдена'
 	})
-	@ApiBearerAuth()
 	@Roles('Admin')
 	@Get('/:name')
 	async getRoleByName(@Param('name') name: string) {

@@ -50,23 +50,18 @@ export class GroupsService {
 
 	async findAll(): Promise<Group[]> {
 		const groups: GroupDocument[] = await this.groupModel.find().exec()
-		return await Promise.all(
-			groups.map(async (group: GroupDocument) => {
-				const members: UserDocument[] =
-					await this.usersService.findUsersByGroupId(group.id)
-				return {
-					...group.toObject(),
-					members: members.map((member: UserDocument) => member.toObject())
-				}
-			})
-		)
+		return groups
 	}
 
 	async findOne(id: string) {
-		const group = await this.groupModel.findById(id).exec()
+		const group: GroupDocument = await this.groupModel
+			.findById(id)
+			.populate('members')
+			.exec()
 		if (!group) {
 			throw new HttpException('Group not found', HttpStatus.NOT_FOUND)
 		}
+		console.log(group)
 		return group
 	}
 
