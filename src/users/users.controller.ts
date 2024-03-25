@@ -9,7 +9,6 @@ import { User, UserDocument } from '../schemas/user.schema'
 import { UsersService } from './users.service'
 import { UserEntity } from './entities/user.entity'
 import { Roles } from '../auth/roles-auth.decorator'
-import { TransformResponse } from '../utils/interceptros/custom-class-serializer.interceptor'
 import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-serializer.interceptor'
 
 @ApiTags('Пользователи')
@@ -24,7 +23,6 @@ export class UsersController {
 		description: 'Успешное получение всех пользователей'
 	})
 	@ApiBearerAuth()
-	@TransformResponse(UserEntity)
 	@Roles('Admin')
 	@Get()
 	async getAll(): Promise<UserDocument[]> {
@@ -40,9 +38,8 @@ export class UsersController {
 	@ApiBearerAuth()
 	@UseMongooseInterceptor(UserEntity)
 	@Get('me')
-	async getMe(@Req() request: Request) {
-		const user = await this.usersService.getMe(request)
-		return user
+	async getMe(@Req() request: Request): Promise<UserDocument> {
+		return await this.usersService.getMe(request)
 	}
 	// @ApiOperation({ summary: 'Удалить пользователя. Доступно админам' })
 	// @ApiResponse({

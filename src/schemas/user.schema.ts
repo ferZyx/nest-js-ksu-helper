@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { Role } from './role.schema'
@@ -29,8 +30,7 @@ export class User {
 	})
 	@Prop({
 		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }],
-		required: true,
-		autopopulate: true
+		required: true
 	})
 	roles: Role[]
 
@@ -44,7 +44,7 @@ export class User {
 		ref: 'Group',
 		default: null
 	})
-	group: Group
+	group: Types.ObjectId
 
 	@ApiProperty({
 		example: 'user',
@@ -59,12 +59,15 @@ export class User {
 	})
 	groupRole: string
 
+	@ApiProperty({
+		description: 'Уведомления пользователя',
+		required: false
+	})
 	@Prop({
 		required: false,
 		type: [
 			{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification', default: [] }
-		],
-		autopopulate: true
+		]
 	})
 	notifications: NotificationDocument[]
 }

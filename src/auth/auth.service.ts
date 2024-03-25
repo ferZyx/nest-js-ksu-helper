@@ -15,15 +15,14 @@ export class AuthService {
 
 	async registration(dto: CreateUserDto) {
 		const hashPassword = await bcrypt.hash(dto.password, 5)
-		const user = await this.usersService.createUser({
+		const user: UserDocument = await this.usersService.createUser({
 			...dto,
 			password: hashPassword
 		})
-
 		return this.generateToken(user)
 	}
 
-	async login(userDto: LoginUserDto) {
+	async login(userDto: LoginUserDto): Promise<{ token: string }> {
 		const user = await this.validateUser(userDto)
 		return this.generateToken(user)
 	}
@@ -32,9 +31,7 @@ export class AuthService {
 		const payload = {
 			email: user.email,
 			id: user._id,
-			roles: user.roles,
-			group: user.group,
-			groupRole: user.groupRole
+			roles: user.roles
 		}
 		return {
 			token: this.jwtService.sign(payload)

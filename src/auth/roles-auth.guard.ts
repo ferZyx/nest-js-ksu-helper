@@ -34,7 +34,7 @@ export class RolesAuthGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest()
 		this.authCheck(request)
 
-		// Проверяем требуемые роли для доступа к ресурсу указанные в @Roles декораторе
+		// Получаем требуемые роли для доступа к ресурсу указанные в @Roles декораторе
 		const requiredRoles = this.reflector.getAllAndOverride<string[]>(
 			ROLES_KEY,
 			[context.getHandler(), context.getClass()]
@@ -45,6 +45,7 @@ export class RolesAuthGuard implements CanActivate {
 			return true
 		}
 
+		// Проверяем есть ли у пользователя требуемые роли
 		const userRoles = request.user?.roles
 		return userRoles.some((role: { name: string }) => {
 			return requiredRoles.includes(role.name)

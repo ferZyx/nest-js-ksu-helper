@@ -24,4 +24,9 @@ export class GroupEntity extends BaseEntity {
 
 	@Type(() => UserEntity)
 	joinRequests: User[]
+
+	constructor(partial: Partial<GroupEntity>) {
+		super()
+		Object.assign(this, partial)
+	}
 }

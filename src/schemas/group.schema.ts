@@ -32,7 +32,6 @@ export class Group {
 			{
 				type: mongoose.Schema.Types.ObjectId,
 				ref: 'User',
-				autopopulate: true,
 				default: []
 			}
 		]

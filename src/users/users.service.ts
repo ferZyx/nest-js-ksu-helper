@@ -19,7 +19,11 @@ export class UsersService {
 	) {}
 
 	getAll(): Promise<UserDocument[]> {
-		return this.userModel.find()
+		return this.userModel
+			.find()
+			.populate('roles')
+			.populate('notifications')
+			.exec()
 	}
 
 	async createUser(dto: CreateUserDto): Promise<UserDocument> {
@@ -51,11 +55,14 @@ export class UsersService {
 	}
 
 	async findUserByEmail(email: string): Promise<UserDocument> {
-		return this.userModel.findOne({ email })
+		return this.userModel.findOne({ email }).populate('roles')
 	}
 
 	async findUserById(id: string): Promise<UserDocument> {
-		return this.userModel.findById(id)
+		return this.userModel
+			.findById(id)
+			.populate('roles')
+			.populate('notifications')
 	}
 
 	async findUsersByGroupId(groupId: string): Promise<UserDocument[]> {
@@ -65,8 +72,11 @@ export class UsersService {
 	async getMe(request: Request) {
 		const userId = request['user'].id
 
-		const user: UserDocument = await this.findUserById(userId)
-		return user
+		return this.userModel
+			.findById(userId)
+			.populate('roles')
+			.populate('notifications')
+			.exec()
 	}
 
 	async remove(id: string) {
