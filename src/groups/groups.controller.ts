@@ -120,7 +120,8 @@ export class GroupsController {
 	@ApiOperation({ summary: 'Вступить в группу' })
 	@ApiResponse({
 		status: HttpStatus.OK,
-		description: 'Успешное вступление/отправлена заявка'
+		description:
+			'Успешное вступление/отправлена заявка. Тоже надо как то продумать ответ на случай разных итогов. Вступили или подали заявку'
 	})
 	@HttpCode(HttpStatus.OK)
 	@Post(':id/join')
@@ -128,6 +129,12 @@ export class GroupsController {
 		return this.groupsService.joinGroup(groupId, req['user'].id)
 	}
 
+	@ApiOperation({ summary: 'Принять заявку в группу или отклонить' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description:
+			'Заявка принята или отклонена. Там кароче в ответе будет статус. Мб передлаем. я хз как нормально сделать'
+	})
 	@HttpCode(HttpStatus.OK)
 	@Post(':id/join/accept/:userId')
 	acceptRequest(

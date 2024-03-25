@@ -7,6 +7,7 @@ import { RolesService } from '../roles/roles.service'
 import { RoleDocument } from '../schemas/role.schema'
 import { GroupsService } from '../groups/groups.service'
 import { NotificationsService } from '../notifications/notifications.service'
+import { GroupRolesEnum } from '../schemas/group.schema'
 
 @Injectable()
 export class UsersService {
@@ -81,5 +82,27 @@ export class UsersService {
 
 	async remove(id: string) {
 		return this.userModel.findByIdAndDelete(id).exec()
+	}
+
+	async leaveGroup(userId: string): Promise<UserDocument> {
+		const user: UserDocument = await this.findUserById(userId)
+		if (!user.group) {
+			throw new HttpException('User is not in a group', HttpStatus.BAD_REQUEST)
+		}
+		if (user.groupRole === GroupRolesEnum.owner) {
+			throw new HttpException(
+				'Owner cannot leave the group',
+				HttpStatus.BAD_REQUEST
+			)
+		}
+		return this.userModel
+			.findByIdAndUpdate(
+				userId,
+				{ group: null, groupRole: null },
+				{ new: true }
+			)
+			.populate('roles')
+			.populate('notifications')
+			.exec()
 	}
 }

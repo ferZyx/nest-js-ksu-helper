@@ -1,4 +1,11 @@
-import { Controller, Get, HttpStatus, Req } from '@nestjs/common'
+import {
+	Controller,
+	Get,
+	HttpCode,
+	HttpStatus,
+	Post,
+	Req
+} from '@nestjs/common'
 import {
 	ApiBearerAuth,
 	ApiOperation,
@@ -11,6 +18,7 @@ import { UserEntity } from './entities/user.entity'
 import { Roles } from '../auth/roles-auth.decorator'
 import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-serializer.interceptor'
 
+@ApiBearerAuth()
 @ApiTags('Пользователи')
 @Controller('users')
 export class UsersController {
@@ -22,7 +30,6 @@ export class UsersController {
 		status: HttpStatus.OK,
 		description: 'Успешное получение всех пользователей'
 	})
-	@ApiBearerAuth()
 	@Roles('Admin')
 	@Get()
 	async getAll(): Promise<UserDocument[]> {
@@ -35,7 +42,6 @@ export class UsersController {
 		status: HttpStatus.OK,
 		description: 'Успешное получение о себе'
 	})
-	@ApiBearerAuth()
 	@UseMongooseInterceptor(UserEntity)
 	@Get('me')
 	async getMe(@Req() request: Request): Promise<UserDocument> {
@@ -54,4 +60,16 @@ export class UsersController {
 	// 	const user = await this.usersService.remove(id)
 	// 	return new UserEntity(user.toObject())
 	// }
+
+	@ApiOperation({ summary: 'Покинуть группу' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Успешное покидание группы'
+	})
+	@UseMongooseInterceptor(UserEntity)
+	@HttpCode(HttpStatus.OK)
+	@Post('me/leave_group')
+	leaveGroup(@Req() req: Request): Promise<UserDocument> {
+		return this.usersService.leaveGroup(req['user'].id)
+	}
 }
