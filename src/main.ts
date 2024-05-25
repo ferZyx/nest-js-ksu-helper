@@ -4,12 +4,13 @@ import * as process from 'process'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as cookieParser from 'cookie-parser'
 import { ValidationPipe } from '@nestjs/common'
+import { json, urlencoded } from 'express'
 
 async function bootstrap() {
 	const PORT = process.env.PORT || 5000
 	const app = await NestFactory.create(AppModule)
 
-	if (process.env.NEST_DEBUG === 'true') {
+	if (process.env.NEST_DEBUG === 'true' || true) {
 		const config = new DocumentBuilder()
 			.setTitle('Апишечка от бога')
 			.setDescription('Владик смог запусить сваггер')
@@ -35,6 +36,8 @@ async function bootstrap() {
 			'http://localhost:3000'
 		]
 	})
+	app.use(json({ limit: '50mb' }))
+	app.use(urlencoded({ extended: true, limit: '50mb' }))
 
 	app.useGlobalPipes(
 		new ValidationPipe({

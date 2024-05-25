@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { Role } from './role.schema'
-import { Group, GroupRolesEnum } from './group.schema'
+import { GroupRolesEnum } from './group.schema'
 import { NotificationDocument } from './notification.schema'
 
 export type UserDocument = mongoose.Document & User
