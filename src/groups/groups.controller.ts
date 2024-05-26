@@ -27,7 +27,7 @@ import { GroupEntity } from './entities/group.entity'
 import { Roles } from '../auth/roles-auth.decorator'
 import { CreateGroupDto } from './dto/create-group.dto'
 
-@ApiTags('Группы')
+@ApiTags('[NOT READY] Группы')
 @ApiBearerAuth()
 @Controller('groups')
 export class GroupsController {
