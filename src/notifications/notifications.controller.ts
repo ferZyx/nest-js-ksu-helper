@@ -25,7 +25,7 @@ import { ParseObjectIdPipe } from '../utils/pipes/parse-object-id.pipe'
 import { UpdateNotificationDto } from './dto/update-notification.dto'
 import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-serializer.interceptor'
 
-@ApiTags('Уведомления')
+@ApiTags('[NOT READY] Уведомления')
 @ApiBearerAuth()
 @Controller('notifications')
 export class NotificationsController {

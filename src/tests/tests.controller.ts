@@ -23,6 +23,11 @@ export class TestsController {
 
 	// Есть страница где можно удобно создавать тесты. Эта страница присылает на сервер объект с вопросами и ответами.
 	// Сервер же создает из этого TEST и сохраняет его в базу данных. Это в этом методе
+	@ApiOperation({
+		summary: 'Создать тест',
+		description:
+			'Принимает объект с вопросами и ответами и создает тест в базе данных'
+	})
 	@UseMongooseInterceptor(TestEntity)
 	@Post()
 	create(@Body() createTestDto: CreateTestDto) {
