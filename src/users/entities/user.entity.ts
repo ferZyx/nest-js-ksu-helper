@@ -43,6 +43,9 @@ export class UserEntity extends BaseEntity {
 	@Type(() => NotificationEntity)
 	readonly notifications: Notification[]
 
+	@ApiProperty({ example: 0, description: 'Количество созданных тестов' })
+	readonly testsCreated: number
+
 	constructor(partial: Partial<UserEntity>) {
 		super()
 		Object.assign(this, partial)

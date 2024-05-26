@@ -8,7 +8,7 @@ import { NotificationDocument } from './notification.schema'
 
 export type UserDocument = mongoose.Document & User
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toJSON: { virtuals: true, getters: true } })
 export class User {
 	@ApiProperty({
 		example: 'user@gmail.com',
@@ -73,3 +73,10 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
+
+UserSchema.virtual('testsCreated', {
+	ref: 'Test',
+	localField: '_id',
+	foreignField: 'authorId',
+	count: true
+})

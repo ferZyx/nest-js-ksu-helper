@@ -5,8 +5,6 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { RolesService } from '../roles/roles.service'
 import { RoleDocument } from '../schemas/role.schema'
-import { GroupsService } from '../groups/groups.service'
-import { NotificationsService } from '../notifications/notifications.service'
 import { GroupRolesEnum } from '../schemas/group.schema'
 
 @Injectable()
@@ -14,9 +12,7 @@ export class UsersService {
 	constructor(
 		@InjectModel(User.name)
 		private readonly userModel: Model<UserDocument>,
-		private readonly roleService: RolesService,
-		private readonly groupService: GroupsService,
-		private readonly notificationsService: NotificationsService
+		private readonly roleService: RolesService
 	) {}
 
 	getAll(): Promise<UserDocument[]> {
@@ -75,7 +71,7 @@ export class UsersService {
 
 		return this.userModel
 			.findById(userId)
-			.populate('roles')
+			.populate('roles testsCreated')
 			.populate('notifications')
 			.exec()
 	}
