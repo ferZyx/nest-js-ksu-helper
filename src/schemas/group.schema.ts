@@ -44,12 +44,10 @@ export class Group {
 
 	members: UserDocument[]
 }
-const GroupSchema = SchemaFactory.createForClass(Group)
+export const GroupSchema = SchemaFactory.createForClass(Group)
 
 GroupSchema.virtual('members', {
 	ref: 'User',
 	localField: '_id',
 	foreignField: 'group'
 })
-
-export { GroupSchema }
