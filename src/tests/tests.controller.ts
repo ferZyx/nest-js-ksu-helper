@@ -14,6 +14,8 @@ import { CreateTestDto } from './dto/create-test.dto'
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-serializer.interceptor'
 import { TestEntity } from './entities/test.entity'
+import { CurrentUser } from '../utils/decorators/current-user.decorator'
+import { TestDocument } from '../schemas/test.schema'
 
 @ApiTags('Тесты')
 @ApiBearerAuth()
@@ -30,8 +32,11 @@ export class TestsController {
 	})
 	@UseMongooseInterceptor(TestEntity)
 	@Post()
-	create(@Body() createTestDto: CreateTestDto) {
-		return this.testsService.create(createTestDto)
+	create(
+		@Body() createTestDto: CreateTestDto,
+		@CurrentUser('id') userId: string
+	): Promise<TestDocument> {
+		return this.testsService.create(createTestDto, userId)
 	}
 
 	// В ту страницу где можно создавать тесты можно импортировать данные из ворд файла, тем самый автоматически заполнив форму создания теста.

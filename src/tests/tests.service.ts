@@ -21,7 +21,7 @@ export class TestsService {
 		private readonly httpService: HttpService
 	) {}
 
-	async create(createTestDto: CreateTestDto) {
+	async create(createTestDto: CreateTestDto, userId: string) {
 		// Начать транзакцию
 		const session = await this.connection.startSession()
 		session.startTransaction()
@@ -67,7 +67,8 @@ export class TestsService {
 
 			const test = new this.testModel({
 				...createTestDto,
-				questions: createdQuestions
+				questions: createdQuestions,
+				author: userId
 			})
 			await test.save({ session })
 			await session.commitTransaction()
