@@ -25,7 +25,7 @@ export class Test {
 	privacy: TestPrivacyEnum
 
 	@Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-	author: User
+	authorId: User
 }
 
 export const TestSchema = SchemaFactory.createForClass(Test)

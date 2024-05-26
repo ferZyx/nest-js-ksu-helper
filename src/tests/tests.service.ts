@@ -68,7 +68,7 @@ export class TestsService {
 			const test = new this.testModel({
 				...createTestDto,
 				questions: createdQuestions,
-				author: userId
+				authorId: userId
 			})
 			await test.save({ session })
 			await session.commitTransaction()

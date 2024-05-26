@@ -18,7 +18,7 @@ export class TestEntity extends BaseEntity {
 
 	@ApiProperty()
 	@Transform(({ value }) => value?.toString() || null)
-	author: string
+	authorId: string
 
 	constructor(partial: Partial<TestEntity>) {
 		super()
