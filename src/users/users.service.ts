@@ -62,9 +62,9 @@ export class UsersService {
 			.populate('notifications')
 	}
 
-	async findUsersByGroupId(groupId: string): Promise<UserDocument[]> {
-		return this.userModel.find({ group: groupId })
-	}
+	// async findUsersByGroupId(groupId: string): Promise<UserDocument[]> {
+	// 	return this.userModel.find({ group: groupId })
+	// }
 
 	async getMe(request: Request) {
 		const userId = request['user'].id
