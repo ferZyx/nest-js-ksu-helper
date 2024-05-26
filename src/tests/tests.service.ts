@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { CreateTestDto } from './dto/create-test.dto'
-import { UpdateTestDto } from './dto/update-test.dto'
 import { HttpService } from '@nestjs/axios'
 import { Blob } from 'buffer'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
@@ -22,33 +21,6 @@ export class TestsService {
 		private readonly httpService: HttpService
 	) {}
 
-	// async waitForMongooseConnection(mongoose) {
-	// 	return new Promise((resolve) => {
-	// 		const connection = mongoose.connection
-	// 		if (connection.readyState === 1) {
-	// 			resolve(1)
-	// 			return
-	// 		}
-	// 		console.log(
-	// 			'Mongoose connection is not ready. Waiting for open or reconnect event.'
-	// 		)
-	// 		let resolved = false
-	// 		const setResolved = () => {
-	// 			console.log(
-	// 				'Mongoose connection became ready. promise already resolved: ' +
-	// 					resolved
-	// 			)
-	// 			if (!resolved) {
-	// 				console.log('Resolving waitForMongooseConnection')
-	// 				resolved = true
-	// 				resolve(1)
-	// 			}
-	// 		}
-	// 		connection.once('open', setResolved)
-	// 		connection.once('reconnect', setResolved)
-	// 	})
-	// }
-
 	async create(createTestDto: CreateTestDto) {
 		// Начать транзакцию
 		const session = await this.connection.startSession()
@@ -65,7 +37,7 @@ export class TestsService {
 			})
 
 			let i = 0
-			questionsData.forEach((questionData, index) => {
+			questionsData.forEach((questionData, _) => {
 				questionData.answers = questionData.answers.map((answer) => {
 					answer = createdAnswers[i]
 					i++
@@ -108,26 +80,26 @@ export class TestsService {
 		}
 	}
 
-	findAll() {
-		return `This action returns all tests`
-	}
+	// findAll() {
+	// 	return `This action returns all tests`
+	// }
+	//
+	// findOne(id: number) {
+	// 	return `This action returns a #${id} test`
+	// }
+	//
+	// update(id: number, updateTestDto: UpdateTestDto) {
+	// 	return `This action updates a #${id} test`
+	// }
+	//
+	// remove(id: number) {
+	// 	return `This action removes a #${id} test`
+	// }
 
-	findOne(id: number) {
-		return `This action returns a #${id} test`
-	}
-
-	update(id: number, updateTestDto: UpdateTestDto) {
-		return `This action updates a #${id} test`
-	}
-
-	remove(id: number) {
-		return `This action removes a #${id} test`
-	}
-
-	readWordFile(file: Express.Multer.File) {
+	async readWordFile(file: Express.Multer.File) {
 		const formData = new FormData()
 		formData.append('file', new Blob([file.buffer]), file.originalname)
-		return this.httpService.axiosRef.post(
+		const res = await this.httpService.axiosRef.post(
 			'https://api.tolyan.me/express/api/converter/word-to-html',
 			formData,
 			{
@@ -136,5 +108,32 @@ export class TestsService {
 				}
 			}
 		)
+		const html = this.extractTagContent(res.data, 'body')
+
+		// Это нужно на случай если в ворде текст с отступами. Ну и на будущее мб тоже какой-то тег такой появится противный
+		const tagsToRemove = ['blockquote']
+		return this.removeTags(html, tagsToRemove)
+	}
+
+	private extractTagContent(html: string, tagName: string): string {
+		const regex = new RegExp(
+			`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`,
+			'i'
+		)
+		const match = regex.exec(html)
+
+		if (match && match[1]) {
+			return match[1]
+		}
+
+		return ''
+	}
+
+	private removeTags(html: string, tags: string[]): string {
+		tags.forEach((tag) => {
+			const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi')
+			html = html.replace(regex, (_, p1) => p1)
+		})
+		return html
 	}
 }

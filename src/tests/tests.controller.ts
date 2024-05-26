@@ -34,22 +34,21 @@ export class TestsController {
 		return this.testsService.create(createTestDto)
 	}
 
-	// В ту страницу где можно создавать тесты можно импортировать данные из ворд файла, тем самыв автоматически заполнив форму создания теста.
-	// Это метод который принимает ворд файл и возвращает данные в виде хтмл.
-	// Нужно будет написать притер и вставить его сюда. ЧТобы не слать ужасно длинную хтмлку после libreOffice
+	// В ту страницу где можно создавать тесты можно импортировать данные из ворд файла, тем самый автоматически заполнив форму создания теста.
+	// Это метод, который принимает ворд файл и возвращает данные в виде хтмл.
+	// Нужно будет написать притер и вставить его сюда. Чтобы не слать ужасно длинную хтмлку после libreOffice
 	@ApiOperation({
-		summary: 'Прочитать ворд файл. Возвращает хмтл',
-		description: 'Принимает 1 ворд файлик в поле file в формдате'
+		summary: 'Прочитать word файл',
+		description: 'В form-data принимает word файл и возвращает html'
 	})
 	@HttpCode(HttpStatus.OK)
 	@Post('read-word-file')
 	@UseInterceptors(FileInterceptor('file'))
-	async uploadTest(
+	uploadTest(
 		@UploadedFile(new WordFileTypeValidationPipe())
 		file: Express.Multer.File
 	) {
-		const htmlFile = await this.testsService.readWordFile(file)
-		return htmlFile.data
+		return this.testsService.readWordFile(file)
 	}
 
 	// @Get()
