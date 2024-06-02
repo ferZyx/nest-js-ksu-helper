@@ -1,21 +1,22 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { CreateTestDto } from './dto/create-test.dto'
 import { HttpService } from '@nestjs/axios'
 import { Blob } from 'buffer'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import mongoose, { Model } from 'mongoose'
-import { TestDocument } from '../schemas/test.schema'
-import { AnswerDocument } from '../schemas/answer.schema'
-import { QuestionDocument } from '../schemas/question.schema'
+import { Test, TestDocument, TestPrivacyEnum } from '../schemas/test.schema'
+import { Answer, AnswerDocument } from '../schemas/answer.schema'
+import { Question, QuestionDocument } from '../schemas/question.schema'
+import { TestQueryDto } from './dto/test-query.dto'
 
 @Injectable()
 export class TestsService {
 	constructor(
-		@InjectModel('Test')
+		@InjectModel(Test.name)
 		private readonly testModel: Model<TestDocument>,
-		@InjectModel('Question')
+		@InjectModel(Question.name)
 		private readonly questionModel: Model<QuestionDocument>,
-		@InjectModel('Answer')
+		@InjectModel(Answer.name)
 		private readonly answerModel: Model<AnswerDocument>,
 		@InjectConnection() private readonly connection: mongoose.Connection,
 		private readonly httpService: HttpService
@@ -81,13 +82,49 @@ export class TestsService {
 		}
 	}
 
-	// findAll() {
-	// 	return `This action returns all tests`
-	// }
-	//
-	// findOne(id: number) {
-	// 	return `This action returns a #${id} test`
-	// }
+	async findAll({ page, limit, authorId }: TestQueryDto, userId: string) {
+		const query = {}
+
+		if (authorId) {
+			if (!mongoose.Types.ObjectId.isValid(authorId)) {
+				throw new BadRequestException('Invalid authorId')
+			}
+			query['authorId'] = authorId
+		}
+
+		if (authorId !== userId) {
+			query['privacy'] = TestPrivacyEnum.public
+		}
+
+		const tests = this.testModel
+			.find(query)
+			.skip((page - 1) * limit)
+			.limit(limit)
+			.exec()
+
+		const docs = await tests
+		const totalDocs = await this.testModel.countDocuments(query).exec()
+		return {
+			docs,
+			totalDocs,
+			page,
+			limit,
+			totalPages: Math.ceil(totalDocs / limit)
+		}
+	}
+
+	findOne(id: string) {
+		return this.testModel
+			.findById(id)
+			.populate({
+				path: 'questions',
+				populate: {
+					path: 'answers'
+				}
+			})
+			.exec()
+	}
+
 	//
 	// update(id: number, updateTestDto: UpdateTestDto) {
 	// 	return `This action updates a #${id} test`

@@ -1,9 +1,12 @@
 import {
 	Body,
 	Controller,
+	Get,
 	HttpCode,
 	HttpStatus,
+	Param,
 	Post,
+	Query,
 	UploadedFile,
 	UseInterceptors
 } from '@nestjs/common'
@@ -16,6 +19,9 @@ import { UseMongooseInterceptor } from '../utils/interceptros/mongoose-class-ser
 import { TestEntity } from './entities/test.entity'
 import { CurrentUser } from '../utils/decorators/current-user.decorator'
 import { TestDocument } from '../schemas/test.schema'
+import { ParseObjectIdPipe } from '../utils/pipes/parse-object-id.pipe'
+import { TestsPaginateResultEntity } from './entities/tests-paginate-result.entity'
+import { TestQueryDto } from './dto/test-query.dto'
 
 @ApiTags('Тесты')
 @ApiBearerAuth()
@@ -56,16 +62,22 @@ export class TestsController {
 		return this.testsService.readWordFile(file)
 	}
 
-	// @Get()
-	// findAll() {
-	// 	return this.testsService.findAll()
-	// }
-	//
-	// @Get(':id')
-	// findOne(@Param('id') id: string) {
-	// 	return this.testsService.findOne(+id)
-	// }
-	//
+	@ApiOperation({
+		summary: 'Получить все публичные тесты. Но если свои то прям все все'
+	})
+	@UseMongooseInterceptor(TestsPaginateResultEntity)
+	@Get()
+	findAll(@Query() query: TestQueryDto, @CurrentUser('id') userId: string) {
+		return this.testsService.findAll(query, userId)
+	}
+
+	@ApiOperation({ summary: 'Получить тест по id' })
+	@UseMongooseInterceptor(TestEntity)
+	@Get(':id')
+	async findOne(@Param('id', ParseObjectIdPipe) id: string) {
+		return await this.testsService.findOne(id)
+	}
+
 	// @Patch(':id')
 	// update(@Param('id') id: string, @Body() updateTestDto: UpdateTestDto) {
 	// 	return this.testsService.update(+id, updateTestDto)
