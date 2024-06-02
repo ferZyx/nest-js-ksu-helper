@@ -13,10 +13,10 @@ function MongooseClassSerializerInterceptor(
 ): typeof ClassSerializerInterceptor {
 	return class MongooseInterceptor extends ClassSerializerInterceptor {
 		private changePlainObjectToClass(document: PlainLiteralObject) {
-			if (!(document instanceof Document)) {
-				return document
+			if (document instanceof Document) {
+				document = document.toJSON()
 			}
-			return new classToIntercept(document.toJSON())
+			return new classToIntercept(document)
 		}
 
 		private prepareResponse(
@@ -24,6 +24,9 @@ function MongooseClassSerializerInterceptor(
 		) {
 			if (Array.isArray(response)) {
 				return response.map(this.changePlainObjectToClass)
+			}
+			if (response.docs) {
+				response.docs = response.docs.map((doc) => doc?.toJSON())
 			}
 
 			return this.changePlainObjectToClass(response)
@@ -34,9 +37,7 @@ function MongooseClassSerializerInterceptor(
 			options: ClassTransformOptions
 		): PlainLiteralObject | PlainLiteralObject[] {
 			const preparedResponse = this.prepareResponse(response)
-			return super.serialize(preparedResponse, {
-				...options
-			})
+			return super.serialize(preparedResponse, options)
 		}
 	}
 }
