@@ -10,22 +10,6 @@ async function bootstrap() {
 	const PORT = process.env.PORT || 5000
 	const app = await NestFactory.create(AppModule)
 
-	if (process.env.NEST_DEBUG === 'true' || true) {
-		const config = new DocumentBuilder()
-			.setTitle('Апишечка от бога')
-			.setDescription('Владик смог запусить сваггер')
-			.setVersion('1.0.0')
-			.addBearerAuth()
-			.build()
-		const document = SwaggerModule.createDocument(app, config)
-		SwaggerModule.setup('/api/docs', app, document, {
-			customSiteTitle: 'Tolyan API Docs',
-			swaggerOptions: {
-				docExpansion: 'none'
-			}
-		})
-	}
-
 	app.setGlobalPrefix('api')
 	app.use(cookieParser())
 	app.enableCors({
@@ -44,6 +28,22 @@ async function bootstrap() {
 			whitelist: true
 		})
 	)
+
+	if (process.env.NEST_DEBUG === 'true' || true) {
+		const config = new DocumentBuilder()
+			.setTitle('Апишечка от бога')
+			.setDescription('Владик смог запусить сваггер')
+			.setVersion('1.0.0')
+			.addBearerAuth()
+			.build()
+		const document = SwaggerModule.createDocument(app, config)
+		SwaggerModule.setup('/api/docs', app, document, {
+			customSiteTitle: 'Tolyan API Docs',
+			swaggerOptions: {
+				docExpansion: 'none'
+			}
+		})
+	}
 
 	await app
 		.listen(PORT)
