@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	ForbiddenException,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
 import { CreateTestDto } from './dto/create-test.dto'
 import { HttpService } from '@nestjs/axios'
 import { Blob } from 'buffer'
-import { InjectConnection, InjectModel } from '@nestjs/mongoose'
+import { InjectModel } from '@nestjs/mongoose'
 import mongoose, { Model } from 'mongoose'
 import { Test, TestDocument, TestPrivacyEnum } from '../schemas/test.schema'
 import { Answer, AnswerDocument } from '../schemas/answer.schema'
@@ -18,68 +23,35 @@ export class TestsService {
 		private readonly questionModel: Model<QuestionDocument>,
 		@InjectModel(Answer.name)
 		private readonly answerModel: Model<AnswerDocument>,
-		@InjectConnection() private readonly connection: mongoose.Connection,
 		private readonly httpService: HttpService
 	) {}
 
 	async create(createTestDto: CreateTestDto, userId: string) {
-		// Начать транзакцию
-		const session = await this.connection.startSession()
-		session.startTransaction()
+		const questionsData = createTestDto.questions
 
-		try {
-			const questionsData = createTestDto.questions
+		const answers = questionsData.flatMap(
+			(questionData) => questionData.answers
+		)
+		const createdAnswers = await this.answerModel.insertMany(answers)
 
-			const answers = questionsData.flatMap(
-				(questionData) => questionData.answers
-			)
-			const createdAnswers = await this.answerModel.insertMany(answers, {
-				session
+		let i = 0
+		questionsData.forEach((questionData, _) => {
+			questionData.answers = questionData.answers.map((answer) => {
+				answer = createdAnswers[i]
+				i++
+				return answer
 			})
+		})
 
-			let i = 0
-			questionsData.forEach((questionData, _) => {
-				questionData.answers = questionData.answers.map((answer) => {
-					answer = createdAnswers[i]
-					i++
-					return answer
-				})
-			})
+		const createdQuestions = await this.questionModel.insertMany(questionsData)
 
-			const createdQuestions = await this.questionModel.insertMany(
-				questionsData,
-				{ session }
-			)
-
-			// for (const questionData of questionsData) {
-			// 	const createdAnswers = await this.answerModel.insertMany(
-			// 		questionData.answers,
-			// 		{ session }
-			// 	)
-			// 	console.log(1)
-			// 	const question = new this.questionModel({
-			// 		...questionData,
-			// 		answers: createdAnswers
-			// 	})
-			// 	await question.save({ session })
-			// 	console.log(2)
-			// 	createdQuestions.push(question)
-			// }
-
-			const test = new this.testModel({
-				...createTestDto,
-				questions: createdQuestions,
-				authorId: userId
-			})
-			await test.save({ session })
-			await session.commitTransaction()
-			return test
-		} catch (error) {
-			await session.abortTransaction()
-			throw error
-		} finally {
-			await session.endSession()
-		}
+		const test = new this.testModel({
+			...createTestDto,
+			questions: createdQuestions,
+			authorId: userId
+		})
+		await test.save()
+		return test
 	}
 
 	async findAll({ page, limit, authorId }: TestQueryDto, userId: string) {
@@ -113,16 +85,21 @@ export class TestsService {
 		}
 	}
 
-	findOne(id: string) {
-		return this.testModel
+	async findOne(id: string) {
+		const test = await this.testModel
 			.findById(id)
 			.populate({
 				path: 'questions',
 				populate: {
-					path: 'answers'
+					path: 'answers',
+					select: '-isCorrect'
 				}
 			})
 			.exec()
+		if (!test) {
+			throw new NotFoundException('Test not found')
+		}
+		return test
 	}
 
 	//
@@ -173,5 +150,31 @@ export class TestsService {
 			html = html.replace(regex, (_, p1) => p1)
 		})
 		return html
+	}
+
+	async remove(testId: string, userId: string) {
+		const test = await this.testModel.findById(testId).exec()
+		if (!test) {
+			throw new BadRequestException('Test not found')
+		}
+		if (String(test.authorId) !== String(userId)) {
+			throw new ForbiddenException('You are not the author of this test')
+		}
+
+		const questions = await this.questionModel.find({
+			_id: { $in: test.questions }
+		})
+		const questionIds = questions.map((question) => question._id)
+		const answers = []
+		questions.forEach((question) => {
+			answers.push(...question.answers)
+		})
+		const answerIds = answers.map((answer) => answer._id)
+
+		await this.testModel.deleteOne({ _id: test._id })
+		await this.questionModel.deleteMany({ _id: { $in: questionIds } })
+		await this.answerModel.deleteMany({ _id: { $in: answerIds } })
+
+		return
 	}
 }

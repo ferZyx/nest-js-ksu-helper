@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	HttpCode,
 	HttpStatus,
@@ -83,8 +84,10 @@ export class TestsController {
 	// 	return this.testsService.update(+id, updateTestDto)
 	// }
 	//
-	// @Delete(':id')
-	// remove(@Param('id') id: string) {
-	// 	return this.testsService.remove(+id)
-	// }
+
+	@ApiOperation({ summary: 'Удалить тест по id' })
+	@Delete(':id')
+	remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
+		return this.testsService.remove(id, userId)
+	}
 }

@@ -25,7 +25,7 @@ function MongooseClassSerializerInterceptor(
 			if (Array.isArray(response)) {
 				return response.map(this.changePlainObjectToClass)
 			}
-			if (response.docs) {
+			if (response?.docs) {
 				response.docs = response.docs.map((doc) => doc?.toJSON())
 			}
 
