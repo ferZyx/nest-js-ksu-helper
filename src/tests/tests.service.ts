@@ -13,6 +13,7 @@ import { Test, TestDocument, TestPrivacyEnum } from '../schemas/test.schema'
 import { Answer, AnswerDocument } from '../schemas/answer.schema'
 import { Question, QuestionDocument } from '../schemas/question.schema'
 import { TestQueryDto } from './dto/test-query.dto'
+import { CreateAnswerDto } from '../answers/dto/create-answer.dto'
 
 @Injectable()
 export class TestsService {
@@ -29,9 +30,18 @@ export class TestsService {
 	async create(createTestDto: CreateTestDto, userId: string) {
 		const questionsData = createTestDto.questions
 
-		const answers = questionsData.flatMap(
-			(questionData) => questionData.answers
-		)
+		const answers = questionsData.flatMap((questionData) => {
+			const answers = questionData.answers
+			// Перемешиваем, чтобы по айдишнику нельзя было понять правильный ответ
+			let j: number, temp: CreateAnswerDto
+			for (let i = answers.length - 1; i > 0; i--) {
+				j = Math.floor(Math.random() * (i + 1))
+				temp = answers[j]
+				answers[j] = answers[i]
+				answers[i] = temp
+			}
+			return answers
+		})
 		const createdAnswers = await this.answerModel.insertMany(answers)
 
 		let i = 0
